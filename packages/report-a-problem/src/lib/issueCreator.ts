@@ -73,7 +73,7 @@ function getNewIssueUrl(category: IssueCategory, projectId: string , context: Se
   if (category === IssueCategory.CONTENT && context?.length > 0) {
     return `https://gl.mathhub.info/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
   }
-  return 'https://api.github.com/repos/slatex/sTeX-React/issues';
+  return 'https://api.github.com/repos/slatex/ALeA/issues';
 }
 
 async function createIssueData(
