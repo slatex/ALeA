@@ -136,6 +136,6 @@ export async function createNewIssue(
 
 export function issuesUrlList(context: SelectionContext[]) {
   const { project } = extractProjectAndFilepath(context?.[0]?.source);
-  if (!project) return 'https://github.com/slatex/sTeX-React/issues';
+  if (!project) return 'https://github.com/slatex/ALeA/issues';
   return `https://gl.mathhub.info/${project}/-/issues`;
 }
