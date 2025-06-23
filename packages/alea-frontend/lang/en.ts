@@ -38,7 +38,7 @@ export const en = {
       partneredWith:
         'Top-tier educational content + developed at + esteemed institutions worldwide',
       vollKiProjectInfo:
-        'The VoLL-KI Project is funded by the German Ministry of Research and education (BMBF) under the grant 16DHBKI089 with almost 5 Million Euro and runs Dec. 2021 to November 2025.',
+        'The VoLL-KI Project is funded by the Federal Ministry of Research, Technology and Space (BMFTR) under the grant 16DHBKI089 with almost 5 Million Euro and runs Dec. 2021 to November 2025.',
     },
   },
   login: {
@@ -214,7 +214,7 @@ export const en = {
     description1:
       'Using your interactions with the system, we strive to estimate your competency of various concepts. We use the Bloom extended model',
     description2:
-      ', which classifies learner competencies in six cognitive dimensions for every concept. As a consequence, you see six probability values representing the predicted competency of that concept. This competency model (a.k.a. learner model) is used in all of the semantic services in the VoLL-KI SSFC System.',
+      ', which classifies learner competencies in six cognitive dimensions for every concept. As a consequence, you see six probability values representing the predicted competency of that concept. This competency model (a.k.a. learner model) is used in all of the semantic services in ALeA.',
   },
   courseView: {
     notes: 'Notes',
