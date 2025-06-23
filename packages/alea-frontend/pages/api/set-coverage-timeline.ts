@@ -21,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!checkIfPostOrSetError(req, res)) return;
 
   const courseId = req.body.courseId as string;
-  const action = req.body.action || 'update';
+  const action = req.body.action || 'upsert';
+  if (action is not upsert or delete) return some 4xx error.
 
   try {
     const userId = await getUserIdIfAuthorizedOrSetError(
