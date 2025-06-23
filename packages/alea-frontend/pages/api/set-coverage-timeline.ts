@@ -22,7 +22,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const courseId = req.body.courseId as string;
   const action = req.body.action || 'upsert';
-  if (action is not upsert or delete) return some 4xx error.
+  if (action !== 'upsert' && action !== 'delete') {
+    return res
+      .status(400)
+      .json({ message: 'Invalid action. Must be either "upsert" or "delete".' });
+  }
 
   try {
     const userId = await getUserIdIfAuthorizedOrSetError(
@@ -52,28 +56,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentSnaps = existingData[courseId] || [];
 
     // Replace the row with the same timestamp or add it if new
-    if (action === 'update') {
+    let newSnaps: LectureEntry[];
+
+    if (action === 'upsert') {
       const updatedEntry = req.body.updatedEntry as LectureEntry;
 
-      const newSnaps = [
+      newSnaps = [
         ...currentSnaps.filter((entry) => entry.timestamp_ms !== updatedEntry.timestamp_ms),
         updatedEntry,
       ].sort((a, b) => a.timestamp_ms - b.timestamp_ms);
-
-      existingData[courseId] = newSnaps;
-      fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-      return res.status(200).end();
+    } else if (action === 'delete') {
+      const timestamp = req.body.timestamp_ms;
+      newSnaps = currentSnaps.filter((entry) => entry.timestamp_ms !== timestamp);
     }
+    existingData[courseId] = newSnaps;
+    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
 
     if (action === 'delete') {
-      const timestamp = req.body.timestamp_ms;
-
-      const filteredSnaps = currentSnaps.filter((entry) => entry.timestamp_ms !== timestamp);
-
-      existingData[courseId] = filteredSnaps;
-      fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
       return res.status(200).json({ message: 'Entry deleted successfully!' });
     }
+    return res.status(200).end();
   } catch (error) {
     console.error('Error updating row:', error);
     res.status(500).json({ message: 'Error updating row' });

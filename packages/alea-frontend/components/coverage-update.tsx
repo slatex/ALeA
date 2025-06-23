@@ -14,6 +14,7 @@ import {
   getCourseInfo,
   getCoverageTimeline,
   getDocumentSections,
+  updateCoverageTimeline,
 } from '@stex-react/api';
 import {
   convertHtmlStringToPlain,
@@ -21,7 +22,6 @@ import {
   CoverageTimeline,
   LectureEntry,
 } from '@stex-react/utils';
-import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { SecInfo } from '../types';
@@ -107,15 +107,7 @@ const CoverageUpdateTab = () => {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
-      await axios.post(
-        '/api/set-coverage-timeline',
-        {
-          courseId,
-          updatedEntry,
-        },
-        { headers }
-      );
-
+      await updateCoverageTimeline({ courseId, updatedEntry }, headers);
       setSnaps((prevSnaps) => {
         const index = prevSnaps.findIndex((s) => s.timestamp_ms === updatedEntry.timestamp_ms);
 
@@ -146,16 +138,7 @@ const CoverageUpdateTab = () => {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
-      await axios.post(
-        '/api/set-coverage-timeline',
-        {
-          action: 'delete',
-          courseId,
-          timestamp_ms,
-        },
-        { headers }
-      );
-
+      await updateCoverageTimeline({ courseId, timestamp_ms, action: 'delete' }, headers);
       setSnaps((prev) => prev.filter((e) => e.timestamp_ms !== timestamp_ms));
 
       setSaveMessage({ type: 'success', message: 'Coverage deleted successfully!' });
