@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  getAuthHeaders,
   getCourseInfo,
   getCoverageTimeline,
   getDocumentSections,
@@ -106,8 +105,7 @@ const CoverageUpdateTab = () => {
   const handleSaveSingle = async (updatedEntry: LectureEntry) => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
-      await updateCoverageTimeline({ courseId, updatedEntry }, headers);
+      await updateCoverageTimeline({ courseId, updatedEntry });
       setSnaps((prevSnaps) => {
         const index = prevSnaps.findIndex((s) => s.timestamp_ms === updatedEntry.timestamp_ms);
 
@@ -137,10 +135,8 @@ const CoverageUpdateTab = () => {
   const handleDeleteSingle = async (timestamp_ms: number) => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
-      await updateCoverageTimeline({ courseId, timestamp_ms, action: 'delete' }, headers);
+      await updateCoverageTimeline({ courseId, timestamp_ms, action: 'delete' });
       setSnaps((prev) => prev.filter((e) => e.timestamp_ms !== timestamp_ms));
-
       setSaveMessage({ type: 'success', message: 'Coverage deleted successfully!' });
     } catch (err) {
       console.error(err);

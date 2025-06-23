@@ -71,10 +71,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     existingData[courseId] = newSnaps;
     fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-
-    if (action === 'delete') {
-      return res.status(200).json({ message: 'Entry deleted successfully!' });
-    }
     return res.status(200).end();
   } catch (error) {
     console.error('Error updating row:', error);
