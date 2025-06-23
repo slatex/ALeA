@@ -132,7 +132,7 @@ function FlashCardFront({
               sx={{
                 '& *': {
                   fontSize: `${idx === 0 ? 32 : 20}px !important`,
-                  overflowX: 'unset !important', // Fix for https://github.com/slatex/sTeX-React/issues/63
+                  overflowX: 'unset !important', // Fix for https://github.com/slatex/ALeA/issues/63
                 },
               }}
             >

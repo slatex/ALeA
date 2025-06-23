@@ -28,7 +28,7 @@ export const de = {
     newHome: {
       alea: 'ALᴇA: Adaptiver Lernassistent',
       aleaDesc:
-        'Kurse, die sich an die Präferenzen und Kompetenzen der Lernenden anpassen, abhängig von bestimmten Kursen .',
+        'Kurse, die sich an die Präferenzen und Kompetenzen der Lernenden anpassen, abhängig vom jeweiligen Inhalt.',
       signUpNow: 'Jetzt registrieren',
       exploreOurCourse: 'Entdecken Sie unsere Kurse',
       publications: 'Veröffentlichungen',
@@ -189,7 +189,7 @@ export const de = {
     description1:
       'Anhand Ihrer Interaktionen mit dem System bemühen wir uns, Ihre Kompetenz in Bezug auf verschiedene Konzepte einzuschätzen. Wir verwenden das erweiterte Bloom-Modell ',
     description2:
-      ', welches Lernerkompetenzen für jedes Konzept in sechs kognitive Dimensionen einteilt. Als Folge sehen Sie sechs Werte, die die vorhergesagte Kompetenz dieses Konzepts darstellen. Dieses Kompetenzmodell (auch bekannt als Lernenden-Modell) wird in allen semantischen Diensten im VoLl-KI SSFC-System verwendet.',
+      ', welches Lernerkompetenzen für jedes Konzept in sechs kognitive Dimensionen einteilt. Als Folge sehen Sie sechs Werte, die die vorhergesagte Kompetenz dieses Konzepts darstellen. Dieses Kompetenzmodell (auch bekannt als Lernenden-Modell) wird in allen semantischen Diensten im ALeA.',
   },
   courseView: {
     notes: 'Notizen',

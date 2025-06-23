@@ -1,6 +1,6 @@
-# Getting Started with sTeX-React
+# Getting Started with ALeA
 
-This guide walks you through setting up and running the **sTeX-React** project, which includes:
+This guide walks you through setting up and running the **ALeA** project, which includes:
 - **alea-frontend** (Next.js frontend)
 
 ## Prerequisites  
@@ -18,8 +18,8 @@ npm install -g nx
 
 1. **Clone the Repository**  
    ```sh
-   git clone https://github.com/slatex/sTeX-React.git
-   cd stex-react
+   git clone https://github.com/slatex/ALeA.git
+   cd ALeA
    ```
 
 2. **Install Dependencies**  
