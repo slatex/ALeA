@@ -16,7 +16,7 @@ import { Action, CURRENT_TERM, isFauId, localStore, ResourceName } from '@stex-r
 import dayjs from 'dayjs';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { isEmptyResponse } from 'packages/quiz-utils/src/lib/quiz-utils';
+import { isEmptyResponse } from '@stex-react/quiz-utils';
 import { useEffect, useState } from 'react';
 import { ForceFauLogin } from '../../components/ForceFAULogin';
 import { getLocaleObject } from '../../lang/utils';
@@ -253,27 +253,29 @@ const QuizPage: NextPage = () => {
             }}
           />
         ) : (
-          <QuizDisplay
-            isFrozen={phase !== Phase.STARTED}
-            showPerProblemTime={false}
-            problems={problems}
-            quizEndTs={clientQuizEndTimeMs}
-            existingResponses={quizInfo?.responses}
-            onResponse={async (problemId, response) => {
-              if (!quizId?.length || phase !== Phase.STARTED || isModerator) return;
-              if (isEmptyResponse(response)) return;
-              console.log('inserting response', problemId, response);
-              const answerAccepted = await insertQuizResponse(quizId, problemId, response);
-              if (!answerAccepted) {
-                alert('Answers are no longer being accepted');
-                location.reload();
-              }
-            }}
-            onSubmit={() => {
-              setFinished(true);
-              setFinishedInLocalStore(quizId);
-            }}
-          />
+          <Box fragment-uri={courseId} fragment-kind="Problem">
+            <QuizDisplay
+              isFrozen={phase !== Phase.STARTED}
+              showPerProblemTime={false}
+              problems={problems}
+              quizEndTs={clientQuizEndTimeMs}
+              existingResponses={quizInfo?.responses}
+              onResponse={async (problemId, response) => {
+                if (!quizId?.length || phase !== Phase.STARTED || isModerator) return;
+                if (isEmptyResponse(response)) return;
+                console.log('inserting response', problemId, response);
+                const answerAccepted = await insertQuizResponse(quizId, problemId, response);
+                if (!answerAccepted) {
+                  alert('Answers are no longer being accepted');
+                  location.reload();
+                }
+              }}
+              onSubmit={() => {
+                setFinished(true);
+                setFinishedInLocalStore(quizId);
+              }}
+            />
+          </Box>
         )}
       </Box>
     </MainLayout>
