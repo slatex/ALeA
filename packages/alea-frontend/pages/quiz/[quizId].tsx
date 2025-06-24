@@ -11,12 +11,19 @@ import {
   Phase,
   UserInfo,
 } from '@stex-react/api';
+import { isEmptyResponse } from '@stex-react/quiz-utils';
 import { QuizDisplay } from '@stex-react/stex-react-renderer';
-import { Action, CURRENT_TERM, isFauId, localStore, ResourceName } from '@stex-react/utils';
+import {
+  Action,
+  COURSES_INFO,
+  CURRENT_TERM,
+  isFauId,
+  localStore,
+  ResourceName,
+} from '@stex-react/utils';
 import dayjs from 'dayjs';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { isEmptyResponse } from '@stex-react/quiz-utils';
 import { useEffect, useState } from 'react';
 import { ForceFauLogin } from '../../components/ForceFAULogin';
 import { getLocaleObject } from '../../lang/utils';
@@ -196,6 +203,8 @@ const QuizPage: NextPage = () => {
     checkAccess();
   }, [courseId]);
 
+  const { notes } = COURSES_INFO[courseId] || {};
+
   if (!quizId) return null;
   if (forceFauLogin) {
     return (
@@ -253,7 +262,7 @@ const QuizPage: NextPage = () => {
             }}
           />
         ) : (
-          <Box fragment-uri={courseId} fragment-kind="Problem">
+          <Box fragment-uri={notes} fragment-kind="Problem">
             <QuizDisplay
               isFrozen={phase !== Phase.STARTED}
               showPerProblemTime={false}
