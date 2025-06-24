@@ -139,8 +139,6 @@ export function Header({ headerBgColor }: { headerBgColor?: string }) {
     : process.env.NEXT_PUBLIC_SITE_VERSION === 'staging'
     ? 'crimson !important'
     : 'blue !important';
-
-  const scrollDirection = useScrollDirection();
  
   return (
     <AppBar
