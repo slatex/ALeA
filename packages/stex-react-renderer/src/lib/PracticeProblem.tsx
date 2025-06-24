@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { ForMe } from './ForMe';
 import { getLocaleObject } from './lang/utils';
-import { PerSectionQuiz } from './PerSectionQuiz';
+import { getSyllabusAndAdventurousProblems, PerSectionQuiz } from './PerSectionQuiz';
 
 interface PracticeProblemProps {
   sectionUri: string;
@@ -26,6 +26,9 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   // Caching states
   const [perSectionProblemUris, setPerSectionProblemUris] = useState<string[] | null>(null);
   const [formeProblemUris, setFormeProblemUris] = useState<string[] | null>(null);
+  const [syllabusUris, setSyllabusUris] = useState<string[] | null>(null);
+  const [adventurousUris, setAdventurousUris] = useState<string[] | null>(null);
+  const [allProblemUris, setAllProblemUris] = useState<string[] | null>(null);
 
   const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -56,6 +59,16 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   }, [formeProblemUris, perSectionProblemUris, t.ForMe, t.perSectionQuizButton]);
 
   useEffect(() => {
+    if (!sectionUri) return;
+
+    getSyllabusAndAdventurousProblems(sectionUri).then(({ syllabus, adventurous}) => {
+      setSyllabusUris(syllabus);
+      setAdventurousUris(adventurous);
+     
+    });
+  }, [sectionUri]);
+
+  useEffect(() => {
     if (isAccordionOpen) {
       if (!sectionUri) return;
       setShowProblems(true);
@@ -63,9 +76,12 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
       setTimeout(() => setTabValue(1), 0);
     }
   }, [isAccordionOpen, sectionUri]);
-
   if (isAccordionOpen) {
-    if (formeProblemUris?.length === 0 && perSectionProblemUris?.length === 0) {
+    if (
+      (formeProblemUris?.length ?? 0) === 0 &&
+      (syllabusUris?.length ?? 0) === 0 &&
+      (adventurousUris?.length ?? 0) === 0
+    ) {
       return (
         <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', mb: 2 }}>
           No practice problems available
@@ -129,6 +145,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
             >
               <Tab label={forMeTabLabel} />
               <Tab label={perSectionTabLabel} />
+              <Tab label="I'm feeling adventurous" />
             </Tabs>
             <VisibilityOffIcon
               onClick={() => setShowProblems(false)}
@@ -147,16 +164,27 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
               />
             </Box>
           )}
-
-          {tabValue === 1 && (
+         {tabValue === 1 && (
             <Box mb={2}>
-              <PerSectionQuiz
-                sectionUri={sectionUri}
-                showHideButton={false}
-                showButtonFirst={false}
-                cachedProblemUris={perSectionProblemUris}
-                setCachedProblemUris={setPerSectionProblemUris}
-              />
+          <PerSectionQuiz
+            sectionUri={sectionUri}
+            cachedProblemUris={syllabusUris}
+            showHideButton={false}
+            showButtonFirst={false}
+            setCachedProblemUris={setSyllabusUris}
+          />
+          </Box>
+          )}
+
+          {tabValue === 2 && adventurousUris && (
+            <Box mb={2}>
+            <PerSectionQuiz
+              sectionUri={sectionUri}
+              cachedProblemUris={adventurousUris}
+              showHideButton={false}
+              showButtonFirst={false}
+              setCachedProblemUris={setAdventurousUris}
+            />
             </Box>
           )}
 

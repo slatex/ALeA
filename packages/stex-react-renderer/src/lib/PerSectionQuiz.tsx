@@ -2,7 +2,13 @@ import { FTMLFragment, getFlamsServer } from '@kwarc/ftml-react';
 import { FTML } from '@kwarc/ftml-viewer';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Button, IconButton, LinearProgress, Tooltip, Typography } from '@mui/material';
-import { getSourceUrl } from '@stex-react/api';
+import {
+  getDefiniedaInSection,
+  getQueryResults,
+  getSourceUrl,
+  getSparqlQueryForLoRelationToDimAndConceptPair,
+  getSparqlQueryForLoRelationToNonDimConcept,
+} from '@stex-react/api';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -14,6 +20,56 @@ export function handleViewSource(problemUri: string) {
   getSourceUrl(problemUri).then((sourceLink) => {
     if (sourceLink) window.open(sourceLink, '_blank');
   });
+}
+
+async function getLoRelationConceptUris(problemUri: string): Promise<string[]> {
+  const query = getSparqlQueryForLoRelationToDimAndConceptPair(problemUri);
+  const result = await getQueryResults(query ?? '');
+
+  const conceptUris: string[] = [];
+
+  result?.results?.bindings.forEach((binding) => {
+    const raw = binding.relatedData?.value;
+    console.log('🔍 Raw related data:', raw);
+    if (!raw) return;
+
+    const parts = raw.split('; ').map((p) => p.trim());
+    
+    const poSymbolUris = parts
+      .filter((data) => data.startsWith('http://mathhub.info/ulo#po-symbol='))
+      .map((data) => decodeURIComponent(data.split('#po-symbol=')[1]));
+
+    conceptUris.push(...poSymbolUris);
+  });
+
+  return conceptUris;
+}
+
+export async function getSyllabusAndAdventurousProblems(sectionUri: string) {
+  const defidenda = await getDefiniedaInSection(sectionUri);
+  const defidendaConceptUris = new Set(defidenda.map((d) => d.conceptUri)); // No normalization
+  console.log('🔍 Defidenda concept URIs:', defidendaConceptUris);
+
+  const allProblems: string[] = (
+    await axios.get(`/api/get-problems-by-section?sectionUri=${encodeURIComponent(sectionUri)}`)
+  ).data;
+
+  const syllabus: string[] = [];
+  const adventurous: string[] = [];
+
+  for (const problemUri of allProblems) {
+    const dimConceptUris = await getLoRelationConceptUris(problemUri);
+    console.log(`🔍 DIMM concept URIs for ${problemUri}:`, dimConceptUris);
+    const isSyllabus = dimConceptUris.some((uri) => defidendaConceptUris.has(uri));
+
+    if (isSyllabus) {
+      syllabus.push(problemUri);
+    } else {
+      adventurous.push(problemUri);
+    }
+  }
+
+  return { syllabus, adventurous };
 }
 
 export function UriProblemViewer({
