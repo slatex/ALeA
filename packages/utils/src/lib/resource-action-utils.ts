@@ -202,8 +202,6 @@ export const ALL_RESOURCE_TYPES: ResourceType[] = [
     name: ResourceName.JOB_PORTAL_ORG,
     possibleActions: [Action.MUTATE, Action.CREATE_JOB_POST, Action.ACCESS_CONTROL],
     components: [
-      { type: ComponentType.FIXED, value: 'instance' },
-      { name: 'instanceId', type: ComponentType.VARIABLE, value: CURRENT_TERM },
       { type: ComponentType.FIXED, value: 'orgId' },
       { name: 'orgId', type: ComponentType.VARIABLE },
     ],

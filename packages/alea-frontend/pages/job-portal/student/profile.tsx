@@ -7,12 +7,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { canAccessResource, getStudentProfile, updateStudentProfile } from '@stex-react/api';
 import { Action, CURRENT_TERM, PRIMARY_COL, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
 import { useEffect, useState } from 'react';
-import { canAccessResource, getStudentProfile, updateStudentProfile } from '@stex-react/api';
-import { UserProfileCard } from 'packages/alea-frontend/components/job-portal/UserProfileCard';
+import { UserProfileCard } from '../../../components/job-portal/UserProfileCard';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 
 const ProfileForm = () => {
   const [profileData, setProfileData] = useState({

@@ -1,62 +1,35 @@
-import { useEffect, useState } from 'react';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import BusinessIcon from '@mui/icons-material/Business';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ChatIcon from '@mui/icons-material/Chat';
+import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
+import EventIcon from '@mui/icons-material/Event';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import WorkIcon from '@mui/icons-material/Work';
 import {
   AppBar,
-  Toolbar,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
-  Typography,
+  Avatar,
   Box,
+  Button,
   Card,
   CardContent,
-  TextField,
-  Grid,
-  Badge,
-  InputAdornment,
-  Icon,
-  Avatar,
-  Button,
-  FormControlLabel,
   Checkbox,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  FormControlLabel,
+  Grid,
+  Icon,
+  TextField,
+  Toolbar,
+  Typography,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import MessageIcon from '@mui/icons-material/Message';
-import PersonIcon from '@mui/icons-material/Person';
-import SearchIcon from '@mui/icons-material/Search';
-import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CancelIcon from '@mui/icons-material/Cancel';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import EventIcon from '@mui/icons-material/Event';
-import BusinessIcon from '@mui/icons-material/Business';
-import WorkIcon from '@mui/icons-material/Work';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ChatIcon from '@mui/icons-material/Chat';
-import { Chart } from 'react-google-charts';
-import { Action, CURRENT_TERM, PRIMARY_COL, ResourceName } from '@stex-react/utils';
-import { AccountCircle, FilterList, Search } from '@mui/icons-material';
-import StudentProfile from './profile';
-import Applications from './application';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
-import {
-  canAccessResource,
-  getAllJobPosts,
-  getOrganizationProfile,
-  getStudentProfile,
-  StudentData,
-} from '@stex-react/api';
+import { canAccessResource, getStudentProfile, StudentData } from '@stex-react/api';
+import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { Chart } from 'react-google-charts';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
+import Applications from './application';
+import StudentProfile from './profile';
 
 const recruiterData = [
   ['Category', 'Count'],

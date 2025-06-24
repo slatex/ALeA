@@ -1,3 +1,4 @@
+import { Group, HourglassEmpty, HowToReg, TaskAlt } from '@mui/icons-material';
 import { Box, CircularProgress } from '@mui/material';
 import {
   canAccessResource,
@@ -10,17 +11,15 @@ import {
   OrganizationData,
   RecruiterData,
 } from '@stex-react/api';
-import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { Action, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
 import { useEffect, useMemo, useState } from 'react';
-
-import { Group, HourglassEmpty, HowToReg, TaskAlt } from '@mui/icons-material';
-import { DashboardJobSection, StatsSection } from '../student/dashboard';
 import {
   RecruiterProfileData,
   UserProfileCard,
-} from 'packages/alea-frontend/components/job-portal/UserProfileCard';
+} from '../../../components/job-portal/UserProfileCard';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
+import { DashboardJobSection, StatsSection } from '../student/dashboard';
 
 export function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
@@ -49,10 +48,7 @@ export function RecruiterDashboard() {
         const hasAccess = await canAccessResource(
           ResourceName.JOB_PORTAL_ORG,
           Action.CREATE_JOB_POST,
-          {
-            orgId: String(recProfile.organizationId),
-            instanceId: CURRENT_TERM,
-          }
+          { orgId: String(recProfile.organizationId) }
         );
 
         if (!hasAccess) {

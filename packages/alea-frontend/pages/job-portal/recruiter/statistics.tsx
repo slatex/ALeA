@@ -14,7 +14,7 @@ import {
 import { IconButton } from '@mui/material';
 import { FileOpen, PersonAdd, Cancel, Pause } from '@mui/icons-material';
 import { Chart } from 'react-google-charts';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 import { PRIMARY_COL } from '@stex-react/utils';
 import { JobSelect } from './applications';
 

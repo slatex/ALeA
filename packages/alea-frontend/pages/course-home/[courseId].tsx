@@ -41,7 +41,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { getLocaleObject } from '../../lang/utils';
 import MainLayout from '../../layouts/MainLayout';
-import { RecordedSyllabus } from 'packages/alea-frontend/components/RecordedSyllabus';
+import { RecordedSyllabus } from '../../components/RecordedSyllabus';
 
 export function getCourseEnrollmentAcl(courseId: string, instanceId: string) {
   return `${courseId}-${instanceId}-enrollments`;

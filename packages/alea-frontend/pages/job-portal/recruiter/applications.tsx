@@ -1,13 +1,4 @@
-import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress,
-} from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import {
   ApplicantWithProfile,
   canAccessResource,
@@ -17,10 +8,11 @@ import {
   getStudentProfileUsingUserId,
   JobPostInfo,
 } from '@stex-react/api';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
-import { Action, CURRENT_TERM, PRIMARY_COL, ResourceName } from '@stex-react/utils';
-import { ApplicantTable } from 'packages/alea-frontend/components/job-portal/ApplicantsTable';
+import { Action, PRIMARY_COL, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
+import { ApplicantTable } from '../../../components/job-portal/ApplicantsTable';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
+import { useEffect, useState } from 'react';
 
 const StatusFilter = ({
   applicants,
@@ -89,10 +81,7 @@ export const JobSelect = ({
       const hasAccess = await canAccessResource(
         ResourceName.JOB_PORTAL_ORG,
         Action.CREATE_JOB_POST,
-        {
-          orgId: String(recruiterData.organizationId),
-          instanceId: CURRENT_TERM,
-        }
+        { orgId: String(recruiterData.organizationId) }
       );
 
       if (!hasAccess) {

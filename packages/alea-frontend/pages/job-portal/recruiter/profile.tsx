@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
 import {
   Box,
-  TextField,
   Button,
-  Typography,
   Card,
   CardContent,
   CircularProgress,
+  TextField,
+  Typography,
 } from '@mui/material';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
-import { Action, CURRENT_TERM, PRIMARY_COL, ResourceName } from '@stex-react/utils';
 import {
   canAccessResource,
   getOrganizationProfile,
@@ -17,9 +14,12 @@ import {
   RecruiterData,
   updateRecruiterProfile,
 } from '@stex-react/api';
+import { Action, PRIMARY_COL, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import { UserProfileCard } from 'packages/alea-frontend/components/job-portal/UserProfileCard';
-import { OrganizationDetails } from 'packages/alea-frontend/components/job-portal/OrganizationDetails';
+import { useEffect, useState } from 'react';
+import { OrganizationDetails } from '../../../components/job-portal/OrganizationDetails';
+import { UserProfileCard } from '../../../components/job-portal/UserProfileCard';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 
 const ProfileForm = () => {
   const [profileData, setProfileData] = useState({
@@ -63,10 +63,7 @@ const ProfileForm = () => {
         const hasAccess = await canAccessResource(
           ResourceName.JOB_PORTAL_ORG,
           Action.CREATE_JOB_POST,
-          {
-            orgId: String(res.organizationId),
-            instanceId: CURRENT_TERM,
-          }
+          { orgId: String(res.organizationId) }
         );
         if (!hasAccess) {
           alert('You do not have access to this page.');

@@ -1,11 +1,11 @@
 import {
-  Container,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
   Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
 } from '@mui/material';
 import {
   canAccessResource,
@@ -15,8 +15,8 @@ import {
 } from '@stex-react/api';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
 import { useEffect, useState } from 'react';
+import MainLayout from '../../../layouts/MainLayout';
 
 export default function StudentRegistration() {
   const router = useRouter();

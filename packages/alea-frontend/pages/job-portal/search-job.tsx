@@ -32,8 +32,9 @@ import {
 } from '@stex-react/api';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
 import { useEffect, useState } from 'react';
+import JpLayoutWithSidebar from '../../layouts/JpLayoutWithSidebar';
+
 const JobDetailsModal = ({ open, onClose, selectedJob }) => {
   return (
     <Modal open={open} onClose={onClose} closeAfterTransition sx={{ zIndex: 2005 }}>

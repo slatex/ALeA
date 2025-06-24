@@ -1,13 +1,11 @@
+import { Action, isFauId, ResourceName } from '@stex-react/utils';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-utils';
 import {
   checkIfPostOrSetError,
   executeAndEndSet500OnError,
   executeDontEndSet500OnError,
-  getUserIdOrSetError,
 } from '../comment-utils';
-import { Action, CURRENT_TERM, isFauId, ResourceName } from '@stex-react/utils';
-import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-utils';
-import { getOrganizationId } from '@stex-react/api';
 
 export async function checkIfUserExistsOnJP(userId: string, res) {
   let tableToCheck;
@@ -33,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res,
     ResourceName.JOB_PORTAL_ORG,
     Action.CREATE_JOB_POST,
-    { orgId: organizationId, instanceId: CURRENT_TERM }
+    { orgId: organizationId }
   );
   if (!userId) return;
   const userExists = await checkIfUserExistsOnJP(userId, res);

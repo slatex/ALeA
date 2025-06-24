@@ -199,7 +199,7 @@ const QuizPage: NextPage = () => {
   if (!quizId) return null;
   if (forceFauLogin) {
     return (
-      <MainLayout title="Quizzes | VoLL-KI">
+      <MainLayout title="Quizzes | ALeA">
         <ForceFauLogin content={'quizzes'} />
       </MainLayout>
     );

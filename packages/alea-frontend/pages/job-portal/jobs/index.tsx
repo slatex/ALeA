@@ -1,48 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
+import { Business, CalendarToday, InfoOutlined, LocationOn, Paid } from '@mui/icons-material';
 import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Modal,
   Backdrop,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
   Fade,
+  Grid,
   IconButton,
-  Chip,
-  TableContainer,
-  Table,
-  TableHead,
-  Paper,
-  TableRow,
-  TableCell,
-  TableBody,
+  Modal,
+  Typography,
 } from '@mui/material';
-import {
-  LocationOn,
-  Paid,
-  CalendarToday,
-  InfoOutlined,
-  WorkOutline,
-  Business,
-  PendingActions,
-  Cancel,
-  CheckCircle,
-} from '@mui/icons-material';
-import { useRouter } from 'next/router';
 import {
   canAccessResource,
   createJobApplication,
   getAllJobPosts,
   getJobApplicationsByJobPost,
   getOrganizationProfile,
-  getStudentProfile,
   getUserInfo,
 } from '@stex-react/api';
-import { CURRENT_TERM, ResourceName, Action } from '@stex-react/utils';
+import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import MainLayout from '../../../layouts/MainLayout';
 
 const Jobs = () => {
   const [accessCheckLoading, setAccessCheckLoading] = useState(true);

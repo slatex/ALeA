@@ -47,8 +47,8 @@ import {
 } from '@stex-react/api';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
 import React, { useEffect, useState } from 'react';
+import MainLayout from '../../../layouts/MainLayout';
 
 const AppliedJobsDialog = ({ appliedJobs, setAppliedJobs, open, onClose }) => {
   async function handleAcceptOffer(jobApplication: JobApplicationInfo) {

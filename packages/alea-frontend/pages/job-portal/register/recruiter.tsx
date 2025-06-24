@@ -1,21 +1,21 @@
 import {
-  Container,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
   Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { getRecruiterProfile, registerRecruiter } from '@stex-react/api';
 import { isBusinessDomain } from '@stex-react/utils';
 import { useRouter } from 'next/router';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
 import { useEffect, useState } from 'react';
+import MainLayout from '../../../layouts/MainLayout';
 export interface RecruiterRegistrationData {
   name: string;
   email: string;

@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { logout } from '@stex-react/api';
 import Image from 'next/image';
 
-export function ForceFauLogin({ content }: { content?: any }) {
+export function ForceFauLogin({ content }: { content?: string }) {
   return (
     <Box m="0 auto" p="10px" maxWidth="800px">
       You are currently logged in using your personal email. To access the {content || 'resource'},

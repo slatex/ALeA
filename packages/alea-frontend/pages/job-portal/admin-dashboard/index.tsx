@@ -1,47 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import { Delete, Edit, Save } from '@mui/icons-material';
 import {
-  Box,
-  Tabs,
-  Tab,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  Snackbar,
   Alert,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
+  Box,
+  Button,
   Card,
   CardContent,
-  Tooltip,
-  Divider,
   CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Paper,
+  Select,
+  SelectChangeEvent,
+  Snackbar,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  IconButton,
-  SelectChangeEvent,
-  Modal,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
-import { Delete, Edit, Save } from '@mui/icons-material';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
-import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import {
   canAccessResource,
   createJobCategory,
-  deleteJobCategory,
   getJobCategories,
   JobCategoryInfo,
-  updateJobCategory,
 } from '@stex-react/api';
-import { useRouter } from 'next/router';
+import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import dayjs from 'dayjs';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import MainLayout from '../../../layouts/MainLayout';
 
 export function JobCategoryDetails({
   jobCategories,
@@ -160,13 +158,14 @@ const AdminDashboard = () => {
   const handleJobCategoryChange = (event) => {
     setJobCategory(event.target.value);
   };
-  const handleUpdationoJobCategoryChange = (event: SelectChangeEvent<"Full-Time" | "Internship">) => {
+  const handleUpdationoJobCategoryChange = (
+    event: SelectChangeEvent<'Full-Time' | 'Internship'>
+  ) => {
     setEditJob((prev) => ({
       ...prev,
-      jobCategory: event.target.value, 
+      jobCategory: event.target.value,
     }));
   };
-  
 
   const handleDateChange = (type, value) => {
     let updatedStartDate = startDate;
@@ -195,7 +194,7 @@ const AdminDashboard = () => {
       }
     }
   };
-  const handleUpdationDateChange = (type:string, value:string) => {
+  const handleUpdationDateChange = (type: string, value: string) => {
     setEditJob((prev) => {
       const updatedStartDate = type === 'start' ? value : prev.startDate;
       const updatedEndDate = type === 'end' ? value : prev.endDate;
@@ -223,7 +222,6 @@ const AdminDashboard = () => {
       return updatedJob;
     });
   };
-
 
   const handleEdit = (job: JobCategoryInfo) => {
     const formattedEditJob = {
@@ -276,10 +274,8 @@ const AdminDashboard = () => {
     }
   };
 
-  if (accessCheckLoading || loading) {
-    return <CircularProgress color="primary" />;
-  }
-  console.log({ jobCategories });
+  if (accessCheckLoading || loading) return <CircularProgress color="primary" />;
+
   return (
     <MainLayout title="Admin Dashboard | Job Portal">
       <Box
@@ -314,7 +310,6 @@ const AdminDashboard = () => {
 
         {activeTab === 0 && (
           <>
- 
             <JobCategoryForm onSave={fetchJobCategoryData} />
             <Box>
               <Typography variant="h6" gutterBottom>
@@ -585,24 +580,20 @@ const JobCategoryForm = ({ onSave }: { onSave: () => Promise<void> }) => {
   );
 };
 
-
-
-
-const JobEditModal= ({
+const JobEditModal = ({
   modalOpen,
   setModalOpen,
   editJob,
   handleUpdationoJobCategoryChange,
   handleUpdationDateChange,
   updateJob,
-}:{
+}: {
   modalOpen: boolean;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  editJob: JobCategoryInfo; 
-  handleUpdationoJobCategoryChange: (event: SelectChangeEvent<"Full-Time" | "Internship">) => void;
+  editJob: JobCategoryInfo;
+  handleUpdationoJobCategoryChange: (event: SelectChangeEvent<'Full-Time' | 'Internship'>) => void;
   handleUpdationDateChange: (type: string, value: string) => void;
   updateJob: () => void;
-
 }) => {
   return (
     <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
@@ -678,7 +669,12 @@ const JobEditModal= ({
           </>
         )}
         <Box sx={{ display: 'flex', gap: 3, mt: 3 }}>
-          <Button variant="outlined" color="secondary" onClick={() => setModalOpen(false)} fullWidth>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setModalOpen(false)}
+            fullWidth
+          >
             Cancel
           </Button>
           <Button onClick={updateJob} variant="contained" color="primary" fullWidth>
@@ -689,5 +685,3 @@ const JobEditModal= ({
     </Modal>
   );
 };
-
-

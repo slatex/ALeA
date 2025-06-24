@@ -1,4 +1,4 @@
-import { Container, Box, Typography, Button } from '@mui/material';
+import { Box, Button, Container, Typography } from '@mui/material';
 import {
   canAccessResource,
   checkIfUserRegisteredOnJP,
@@ -8,9 +8,9 @@ import {
 import { Action, CURRENT_TERM, isFauId, ResourceName } from '@stex-react/utils';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { ForceFauLogin } from 'packages/alea-frontend/components/ForceFAULogin';
-import MainLayout from 'packages/alea-frontend/layouts/MainLayout';
 import { useEffect, useState } from 'react';
+import { ForceFauLogin } from '../../components/ForceFAULogin';
+import MainLayout from '../../layouts/MainLayout';
 
 const JobPortal: NextPage = () => {
   const router = useRouter();

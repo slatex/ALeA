@@ -1,28 +1,26 @@
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
-import React, { useState, useEffect } from 'react';
 import {
-  Button,
-  IconButton,
-  Box,
-  TableContainer,
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Chip,
-  CircularProgress,
-  Typography,
-} from '@mui/material';
-import {
+  Cancel,
+  CheckCircle,
   ExpandLess,
   ExpandMore,
-  CheckCircle,
-  Cancel,
-  PendingActions,
   Pause,
+  PendingActions,
 } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import {
   canAccessResource,
   getJobApplicationsByUserId,
@@ -30,8 +28,10 @@ import {
   getOrganizationProfile,
   updateJobApplication,
 } from '@stex-react/api';
-import { useRouter } from 'next/router';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 
 const Applications = () => {
   const [companySortOrder, setCompanySortOrder] = useState('asc');

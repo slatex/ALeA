@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,15 +8,16 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
 import {
   canAccessResource,
   getRecruiterProfile,
   inviteRecruiterToOrg,
   RecruiterData,
 } from '@stex-react/api';
-import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { Action, ResourceName } from '@stex-react/utils';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 
 const InviteRecruiterPage = () => {
   const [email, setEmail] = useState('');
@@ -36,10 +36,7 @@ const InviteRecruiterPage = () => {
       const hasAccess = await canAccessResource(
         ResourceName.JOB_PORTAL_ORG,
         Action.CREATE_JOB_POST,
-        {
-          orgId: String(orgId),
-          instanceId: CURRENT_TERM,
-        }
+        { orgId: String(orgId) }
       );
       if (!hasAccess) {
         alert('You donot have access to this page.');

@@ -1,20 +1,16 @@
-import JpLayoutWithSidebar from 'packages/alea-frontend/layouts/JpLayoutWithSidebar';
-
-import { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   Button,
-  Stepper,
-  Step,
-  StepLabel,
-  MenuItem,
+  CircularProgress,
   FormControl,
   InputLabel,
+  MenuItem,
   Select,
-  CircularProgress,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import {
   canAccessResource,
   createJobPost,
@@ -26,12 +22,15 @@ import {
   updateJobPost,
 } from '@stex-react/api';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
-  JobDescriptionsForm,
-  OfferDetailsForm,
   EligibilityForm,
+  JobDescriptionsForm,
   JobList,
-} from 'packages/alea-frontend/components/job-portal/JobList';
+  OfferDetailsForm,
+} from '../../../components/job-portal/JobList';
+import JpLayoutWithSidebar from '../../../layouts/JpLayoutWithSidebar';
 
 const JobPostPage = () => {
   const router = useRouter();
@@ -68,10 +67,7 @@ const JobPostPage = () => {
       const hasAccess = await canAccessResource(
         ResourceName.JOB_PORTAL_ORG,
         Action.CREATE_JOB_POST,
-        {
-          orgId: String(recruiterData.organizationId),
-          instanceId: CURRENT_TERM,
-        }
+        { orgId: String(recruiterData.organizationId) }
       );
 
       if (!hasAccess) {

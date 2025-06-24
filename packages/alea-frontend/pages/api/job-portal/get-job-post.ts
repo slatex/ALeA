@@ -1,7 +1,7 @@
+import { Action, ResourceName } from '@stex-react/utils';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { checkIfGetOrSetError, executeDontEndSet500OnError } from '../comment-utils';
 import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-utils';
-import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
+import { checkIfGetOrSetError, executeDontEndSet500OnError } from '../comment-utils';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfGetOrSetError(req, res)) return;
@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res,
     ResourceName.JOB_PORTAL_ORG,
     Action.CREATE_JOB_POST,
-    { orgId: organizationId, instanceId: CURRENT_TERM }
+    { orgId: organizationId }
   );
   if (!userId) return;
   const results: any = await executeDontEndSet500OnError(
