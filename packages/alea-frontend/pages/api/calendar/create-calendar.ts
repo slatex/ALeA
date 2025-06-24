@@ -17,18 +17,26 @@ function generateCalendarEvents(
     }
 
     for (const entry of entries) {
-      const start = new Date(entry.timestamp_ms);
-      start.setHours(0, 0, 0, 0);
       const lectureInfo = entry.isQuizScheduled
         ? '📝 Regular Lecture and Quiz'
         : '📚 Regular Lecture';
-      events.push({
-        start,
-        allDay: true,
-        summary: `${courseId} - ${lectureInfo}`,
-        description: `Course: ${courseId}\n${lectureInfo}
-        }`,
-      });
+      if (entry.lectureEndTimestamp_ms) {
+        events.push({
+          start: new Date(entry.timestamp_ms),
+          end: new Date(entry.lectureEndTimestamp_ms),
+          summary: `${courseId} - ${lectureInfo}`,
+          description: `Course: ${courseId}\n${lectureInfo}`,
+        });
+      } else {
+        const start = new Date(entry.timestamp_ms);
+        start.setHours(0, 0, 0, 0);
+        events.push({
+          start,
+          allDay: true,
+          summary: `${courseId} - ${lectureInfo}`,
+          description: `Course: ${courseId}\n${lectureInfo}`,
+        });
+      }
     }
   }
   return events;
