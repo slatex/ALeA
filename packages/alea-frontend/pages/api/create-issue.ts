@@ -1,26 +1,18 @@
 import { NotificationType } from '@stex-react/api';
 import axios, { RawAxiosRequestHeaders } from 'axios';
 import { sendAlert } from './add-comment';
-import {
-  getUserId,
-  sendNotification
-} from './comment-utils';
+import { getUserId, sendNotification } from './comment-utils';
 
-function getHeaders(category: string): RawAxiosRequestHeaders {
-  if (category === 'CONTENT') {
-    return {
-      'PRIVATE-TOKEN': process.env['CONTENT_ISSUES_GITLAB_PAT'] as string,
-    };
-  } else {
-    return { Authorization: `token ${process.env['STEX_REACT_PAT']}` };
+function getHeaders(createNewIssueUrl: string): RawAxiosRequestHeaders {
+  if (createNewIssueUrl.includes('github')) {
+    return { Authorization: `token ${process.env['KWARC_ALEA_PAT']}` };
   }
+  return {
+    'PRIVATE-TOKEN': process.env['CONTENT_ISSUES_GITLAB_PAT'] as string,
+  };
 }
 
-async function sendReportNotifications(
-  userId: string | null = null,
-  link: string,
-  type: string
-) {
+async function sendReportNotifications(userId: string | null = null, link: string, type: string) {
   if (type === 'SUGGESTION') {
     await sendNotification(
       userId,
@@ -48,7 +40,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(404);
   const body = req.body;
 
-  const headers = getHeaders(body.category);
+  const headers = getHeaders(body.createNewIssueUrl);
 
   const response = await axios.post(body.createNewIssueUrl, body.data, {
     headers,

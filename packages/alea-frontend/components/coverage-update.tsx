@@ -9,14 +9,18 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
-import { getAuthHeaders, getCourseInfo, getCoverageTimeline, getDocumentSections } from '@stex-react/api';
+import {
+  getCourseInfo,
+  getCoverageTimeline,
+  getDocumentSections,
+  updateCoverageTimeline,
+} from '@stex-react/api';
 import {
   convertHtmlStringToPlain,
   CourseInfo,
   CoverageTimeline,
   LectureEntry,
 } from '@stex-react/utils';
-import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { SecInfo } from '../types';
@@ -98,13 +102,21 @@ const CoverageUpdateTab = () => {
     setSnaps(courseSnaps);
   }, [coverageTimeline, courseId, router.isReady]);
 
-  const handleSave = async (newSnaps: LectureEntry[]) => {
+  const handleSaveSingle = async (updatedEntry: LectureEntry) => {
     setLoading(true);
     try {
-      const body = { courseId, snaps: newSnaps };
-      const headers = getAuthHeaders();
-      await axios.post('/api/set-coverage-timeline', body, { headers });
-      setSnaps(newSnaps);
+      await updateCoverageTimeline({ courseId, updatedEntry });
+      setSnaps((prevSnaps) => {
+        const index = prevSnaps.findIndex((s) => s.timestamp_ms === updatedEntry.timestamp_ms);
+
+        if (index !== -1) {
+          const updated = [...prevSnaps];
+          updated[index] = updatedEntry;
+          return updated;
+        }
+        return [...prevSnaps, updatedEntry].sort((a, b) => a.timestamp_ms - b.timestamp_ms);
+      });
+
       setSaveMessage({
         type: 'success',
         message: 'Coverage data saved successfully!',
@@ -115,6 +127,20 @@ const CoverageUpdateTab = () => {
         type: 'error',
         message: 'Failed to save coverage data. Please try again.',
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSingle = async (timestamp_ms: number) => {
+    setLoading(true);
+    try {
+      await updateCoverageTimeline({ courseId, timestamp_ms, action: 'delete' });
+      setSnaps((prev) => prev.filter((e) => e.timestamp_ms !== timestamp_ms));
+      setSaveMessage({ type: 'success', message: 'Coverage deleted successfully!' });
+    } catch (err) {
+      console.error(err);
+      setSaveMessage({ type: 'error', message: 'Failed to delete coverage' });
     } finally {
       setLoading(false);
     }
@@ -153,7 +179,8 @@ const CoverageUpdateTab = () => {
               courseId={courseId}
               snaps={snaps}
               secInfo={secInfo}
-              handleSave={handleSave}
+              handleSaveSingle={handleSaveSingle}
+              handleDeleteSingle={handleDeleteSingle}
             />
           </Box>
         </Paper>
