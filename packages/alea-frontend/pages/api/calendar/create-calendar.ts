@@ -1,9 +1,9 @@
 import { Action, LectureEntry } from '@stex-react/utils';
 import ical, { ICalEventData } from 'ical-generator';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { semesterPeriods } from '../../../constants/semester-dates';
 import { getCoverageData } from '../get-coverage-timeline';
 import { getAuthorizedCourseResources } from '../get-resources-for-user';
-import { semesterPeriods, holidays } from '../../../constants/semester-dates';
 
 function generateCalendarEvents(
   coverageData: Record<string, LectureEntry[]>,
@@ -37,39 +37,38 @@ function generateCalendarEvents(
 function generateSemesterAndHolidayEvents(): ICalEventData[] {
   const events: ICalEventData[] = [];
 
-  semesterPeriods.forEach((period) => {
+  Object.entries(semesterPeriods).forEach(([name, period]) => {
     events.push({
       start: new Date(period.semesterStart),
       allDay: true,
-      summary: `Semester Start : ${period.name}`,
-      description: `Start of ${period.name}`,
+      summary: `Semester Start : ${name}`,
+      description: `Start of ${name}`,
     });
     events.push({
       start: new Date(period.semesterEnd),
       allDay: true,
-      summary: `Semester End : ${period.name}`,
-      description: `End of ${period.name}`,
+      summary: `Semester End : ${name}`,
+      description: `End of ${name}`,
     });
     events.push({
       start: new Date(period.lectureStart),
       allDay: true,
-      summary: `Lecture Period Start for Semester : ${period.name}`,
-      description: `Start of lectures for ${period.name}`,
+      summary: `Lecture Period Start for Semester : ${name}`,
+      description: `Start of lectures for ${name}`,
     });
     events.push({
       start: new Date(period.lectureEnd),
       allDay: true,
-      summary: `Lecture Period End for Semester : ${period.name}`,
-      description: `End of lectures for ${period.name}`,
+      summary: `Lecture Period End for Semester : ${name}`,
+      description: `End of lectures for ${name}`,
     });
-  });
-
-  holidays.forEach((holiday) => {
-    events.push({
-      start: new Date(holiday.date),
-      allDay: true,
-      summary: `Holiday: ${holiday.name}`,
-      description: holiday.lectureFree ? `${holiday.name} (No lectures)` : holiday.name,
+    period.holidays.forEach((holiday) => {
+      events.push({
+        start: new Date(holiday.date),
+        allDay: true,
+        summary: `Holiday: ${holiday.name}`,
+        description: `${holiday.name}`,
+      });
     });
   });
 
