@@ -47,7 +47,7 @@ export function UriProblemViewer({
 
   const problemState = getProblemState(isSubmitted, solution, response);
   return (
-    <Box>
+    <Box fragment-uri={uri} fragment-kind="Problem">
       <FTMLFragment
         key={`${uri}-${problemState.type}`}
         fragment={{ type: 'FromBackend', uri }}
@@ -165,26 +165,24 @@ export function PerSectionQuiz({
         </IconButton>
       </Box>
       <Box mb="10px">
-        <Box key={problemUri} fragment-uri={problemUri} fragment-kind="Problem">
-          <UriProblemViewer
-            key={problemUri}
-            uri={problemUri}
-            isSubmitted={isSubmitted[problemIdx]}
-            setIsSubmitted={(v) =>
-              setIsSubmitted((prev) => {
-                prev[problemIdx] = v;
-                return [...prev];
-              })
-            }
-            response={responses[problemIdx]}
-            setResponse={(v) =>
-              setResponses((prev) => {
-                prev[problemIdx] = v;
-                return [...prev];
-              })
-            }
-          />
-        </Box>
+        <UriProblemViewer
+          key={problemUri}
+          uri={problemUri}
+          isSubmitted={isSubmitted[problemIdx]}
+          setIsSubmitted={(v) =>
+            setIsSubmitted((prev) => {
+              prev[problemIdx] = v;
+              return [...prev];
+            })
+          }
+          response={responses[problemIdx]}
+          setResponse={(v) =>
+            setResponses((prev) => {
+              prev[problemIdx] = v;
+              return [...prev];
+            })
+          }
+        />
         {/* TODO ALEA4-P3
         <ProblemDisplay
           r={response}
