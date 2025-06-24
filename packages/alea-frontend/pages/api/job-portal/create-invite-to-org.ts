@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   );
   if (!inviterId) return;
   if (!email || typeof email !== 'string') {
-    res.status(400).json({ error: 'Invalid or missing email' });
+    res.status(400).send('Invalid or missing email');
     return;
   }
   const result = await executeAndEndSet500OnError(

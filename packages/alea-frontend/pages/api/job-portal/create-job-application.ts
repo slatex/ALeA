@@ -17,13 +17,6 @@ export async function checkJobApplicationExists(id: number, userId: string, res:
   if (!results) return;
   const currentJobApplication = results[0];
   if (!currentJobApplication) return false;
-  // console.log({results});
-  // if (results.length === 0) {
-  //     console.log(
-  //         'hello'
-  //     );
-  //     return false;
-  // }
   return true;
 }
 

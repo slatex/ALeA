@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkIfGetOrSetError, executeDontEndSet500OnError } from '../comment-utils';
+
 export async function checkInviteToOrg(
   organizationId: string,
   email: string,
