@@ -1,4 +1,4 @@
-# sTeX-React
+# ALeA
 
 This workspace contains the applications and library related to rendering of sTeX documents (more precisely, RusTeX generated xhtml) using React library. The package manager used here is npm, so install the dependencies using `npm install` before running any other commands. There are two applications in this workspace:
 

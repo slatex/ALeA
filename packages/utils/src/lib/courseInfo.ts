@@ -86,9 +86,13 @@ export interface LectureEntry {
   targetSectionUri?: string;
   isQuizScheduled?: boolean;
   slideUri?: string;
-  slideNumber?: number; //Don't use this anywhere , use slideUri instead
+  slideNumber?: number;  // Don't use this anywhere , use slideUri instead
+  autoDetected?:{
+    clipId?: string;
+    sectionUri?: string; 
+    slideUri?: string; 
+  }
 }
-
 export interface CoverageTimeline {
   [courseId: string]: LectureEntry[];
 }
@@ -96,13 +100,13 @@ export interface CoverageTimeline {
 export const COURSES_INFO: { [courseId: string]: CourseInfo } = {
   'ai-1': createCourseInfo(
     'ai-1',
-    'Artifical Intelligence - I',
+    'Artificial Intelligence - I',
     'MiKoMH/AI',
     'course/notes/notes1.tex'
   ),
   'ai-2': createCourseInfo(
     'ai-2',
-    'Artifical Intelligence - II',
+    'Artificial Intelligence - II',
     'MiKoMH/AI',
     'course/notes/notes2.xhtml',
     true,

@@ -15,6 +15,7 @@ import {
   UserInfo,
 } from '@stex-react/api';
 
+import { FTMLDocument } from '@kwarc/ftml-react';
 import {
   Alert,
   Box,
@@ -24,7 +25,6 @@ import {
   InputAdornment,
   TextField,
 } from '@mui/material';
-import { FTMLDocument } from '@stex-react/ftml-utils';
 import {
   Action,
   BG_COLOR,
@@ -39,9 +39,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import { RecordedSyllabus } from '../../components/RecordedSyllabus';
+import { useStudentCount } from '../../hooks/useStudentCount';
 import { getLocaleObject } from '../../lang/utils';
 import MainLayout from '../../layouts/MainLayout';
-import { RecordedSyllabus } from '../../components/RecordedSyllabus';
 
 export function getCourseEnrollmentAcl(courseId: string, instanceId: string) {
   return `${courseId}-${instanceId}-enrollments`;
@@ -156,6 +157,7 @@ const CourseHomePage: NextPage = () => {
   const [isInstructor, setIsInstructor] = useState(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
+  const studentCount = useStudentCount(courseId, CURRENT_TERM);
 
   useEffect(() => {
     getUserInfo().then((userInfo: UserInfo) => {
@@ -316,6 +318,11 @@ const CourseHomePage: NextPage = () => {
               {q.getEnrolled}
               <SchoolIcon />
             </Button>
+            {studentCount !== null && (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                {studentCount} {q.numberofStudentEnrolled}
+              </Box>
+            )}
             <Alert severity="info" sx={{ display: 'flex', justifyContent: 'center' }}>
               {q.enrollmentMessage}
             </Alert>
@@ -356,7 +363,7 @@ const CourseHomePage: NextPage = () => {
             />
           </Box>
         )}
-        <FTMLDocument document={{ uri: landing, toc: undefined }} />
+        <FTMLDocument document={{ type: 'FromBackend', uri: landing, toc: undefined }} />
         <RecordedSyllabus courseId={courseId} />
       </Box>
     </MainLayout>

@@ -1,10 +1,12 @@
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
 import { canAccessResource, getCourseInfo } from '@stex-react/api';
+import { updateRouterQuery } from '@stex-react/react-utils';
 import { Action, CourseInfo, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import CourseAccessControlDashboard from '../../components/CourseAccessControlDashboard';
+import CoverageUpdateTab from '../../components/coverage-update';
 import HomeworkManager from '../../components/HomeworkManager';
 import { GradingInterface } from '../../components/nap/GradingInterface';
 import InstructorPeerReviewViewing from '../../components/peer-review/InstructorPeerReviewViewing';
@@ -12,8 +14,6 @@ import QuizDashboard from '../../components/QuizDashboard';
 import { StudyBuddyModeratorStats } from '../../components/StudyBuddyModeratorStats';
 import MainLayout from '../../layouts/MainLayout';
 import { CourseHeader } from '../course-home/[courseId]';
-import CoverageUpdatePage from '../../components/coverage-update';
-import { updateRouterQuery } from '@stex-react/react-utils';
 interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
@@ -63,15 +63,13 @@ function ChosenTab({
     case 'homework-grading':
       return <GradingInterface isPeerGrading={false} courseId={courseId} />;
     case 'quiz-dashboard':
-      return (
-        <QuizDashboard courseId={courseId} quizId={quizId} onQuizIdChange={onQuizIdChange} />
-      );
+      return <QuizDashboard courseId={courseId} quizId={quizId} onQuizIdChange={onQuizIdChange} />;
     case 'study-buddy':
       return <StudyBuddyModeratorStats courseId={courseId} />;
     case 'peer-review':
       return <InstructorPeerReviewViewing courseId={courseId}></InstructorPeerReviewViewing>;
     case 'syllabus':
-      return <CoverageUpdatePage />;
+      return <CoverageUpdateTab />;
     default:
       return null;
   }
@@ -117,13 +115,19 @@ const InstructorDash: NextPage = () => {
 
   const [courses, setCourses] = useState<Record<string, CourseInfo> | undefined>(undefined);
 
-  const [accessibleTabs, setAccessibleTabs] = useState<TabName[]>([]);
+  const [accessibleTabs, setAccessibleTabs] = useState<TabName[] | undefined>(undefined); // undefined means loading
   const [currentTabIdx, setCurrentTabIdx] = useState<number>(0);
 
-  const [quizId, setQuizId] = useState<string | undefined>(router.query.quizId as string);
+  const [quizId, setQuizId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (router.isReady) {
+      setQuizId(router.query.quizId as string);
+    }
+  }, [router.isReady, router.query.quizId]);
 
   const handleQuizIdChange = (newQuizId: string) => {
-    if (quizId === newQuizId) return; 
+    if (quizId === newQuizId) return;
     setQuizId(newQuizId);
     updateRouterQuery(router, { quizId: newQuizId }, true);
   };
@@ -144,33 +148,52 @@ const InstructorDash: NextPage = () => {
   useEffect(() => {
     if (!courseId) return;
     async function checkTabAccess() {
-      const tabs: TabName[] = [];
-      for (const [tabName, { resource, actions }] of Object.entries(TAB_ACCESS_REQUIREMENTS)) {
-        for (const action of actions) {
-          if (await canAccessResource(resource, action, { courseId, instanceId: CURRENT_TERM })) {
-            tabs.push(tabName as TabName);
-            break;
+      const tabAccessPromises$ = Object.entries(TAB_ACCESS_REQUIREMENTS).map(
+        async ([tabName, { resource, actions }]) => {
+          for (const action of actions) {
+            if (await canAccessResource(resource, action, { courseId, instanceId: CURRENT_TERM })) {
+              return tabName as TabName;
+            }
           }
+          return undefined;
         }
-      }
-      setAccessibleTabs(tabs);
-      if (tab && tabs.includes(tab)) {
-        setCurrentTabIdx(tabs.indexOf(tab));
-      } else {
-        setCurrentTabIdx(0);
-        updateRouterQuery(router, { tab: tabs[0] }, true);
-      }
+      );
+      const tabs = (await Promise.all(tabAccessPromises$)).filter((t): t is TabName => !!t);
+
+      const tabOrder: TabName[] = [
+        'syllabus',
+        'quiz-dashboard',
+        'homework-manager',
+        'homework-grading',
+        'study-buddy',
+        'peer-review',
+        'access-control',
+      ];
+
+      const sortedTabs = tabOrder.filter((tab) => tabs.includes(tab));
+      setAccessibleTabs(sortedTabs);
     }
     checkTabAccess();
-  }, [courseId, tab]);
+  }, [courseId]);
 
   useEffect(() => {
-  if (tab !== 'quiz-dashboard' && router.query.quizId) {
-    updateRouterQuery(router, { quizId: undefined }, true);
-  }
-}, [tab, router]);
+    if (accessibleTabs === undefined) return;
+    if (tab && accessibleTabs.includes(tab)) {
+      setCurrentTabIdx(accessibleTabs.indexOf(tab));
+    } else {
+      setCurrentTabIdx(0);
+      updateRouterQuery(router, { tab: accessibleTabs[0] }, true);
+    }
+  }, [accessibleTabs, tab, router]);
+
+  useEffect(() => {
+    if (tab !== 'quiz-dashboard' && router.query.quizId) {
+      updateRouterQuery(router, { quizId: undefined }, true);
+    }
+  }, [tab, router]);
 
   const courseInfo = courses?.[courseId];
+  if (!accessibleTabs) return <CircularProgress />;
 
   return (
     <MainLayout>
@@ -189,10 +212,16 @@ const InstructorDash: NextPage = () => {
         <Tabs
           value={currentTabIdx}
           onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
           aria-label="Instructor Dashboard Tabs"
           sx={{
+            overflowX: 'auto',
             '& .MuiTabs-flexContainer': {
-              justifyContent: 'center',
+              justifyContent: {
+                xs: 'flex-start', 
+                md: 'center', 
+              },
             },
             '& .MuiTab-root': {
               fontSize: '14px',
@@ -207,7 +236,12 @@ const InstructorDash: NextPage = () => {
         </Tabs>
         {accessibleTabs.map((tabName, index) => (
           <TabPanel key={tabName} value={currentTabIdx} index={index}>
-            <ChosenTab tabName={tabName} courseId={courseId} quizId={quizId} onQuizIdChange={handleQuizIdChange}/>
+            <ChosenTab
+              tabName={tabName}
+              courseId={courseId}
+              quizId={quizId}
+              onQuizIdChange={handleQuizIdChange}
+            />
           </TabPanel>
         ))}
       </Box>

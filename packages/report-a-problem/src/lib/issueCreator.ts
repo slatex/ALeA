@@ -1,4 +1,5 @@
-import { getAuthHeaders, getSourceUrl, URI } from '@stex-react/api';
+import { FTML } from '@kwarc/ftml-viewer';
+import { getAuthHeaders, getSourceUrl } from '@stex-react/api';
 import { extractRepoAndFilepath as extractProjectAndFilepath } from '@stex-react/utils';
 import axios from 'axios';
 
@@ -14,7 +15,7 @@ export enum IssueCategory {
   DISPLAY = 'DISPLAY',
 }
 export interface SelectionContext {
-  fragmentUri: URI;
+  fragmentUri: FTML.URI;
   fragmentKind: 'Section' | 'Paragraph' | 'Slide';
   source?: string;
 }
@@ -68,11 +69,13 @@ ${THREE_BACKTICKS}
 ${sectionHierarchy}`;
 }
 
-function getNewIssueUrl(category: IssueCategory, projectId: string) {
-  if (category === IssueCategory.CONTENT) {
-    return `https://gl.mathhub.info/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
-  }
-  return 'https://api.github.com/repos/slatex/sTeX-React/issues';
+function isGitlabIssue(category: IssueCategory, context: SelectionContext[]) {
+  return category === IssueCategory.CONTENT && context?.length > 0;
+}
+
+function getNewIssueUrl(category: IssueCategory, projectId: string, context: SelectionContext[]) {
+  if (!isGitlabIssue(category, context)) return 'https://api.github.com/repos/slatex/ALeA/issues';
+  return `https://gl.mathhub.info/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
 }
 
 async function createIssueData(
@@ -88,9 +91,9 @@ async function createIssueData(
   const body = await createIssueBody(type, desc, selectedText, userName, context);
   return {
     title: title || `User reported ${type.toString()} ${filepath}`,
-    ...(category === IssueCategory.DISPLAY
-      ? { body, labels: ['user-reported'] }
-      : { description: body }),
+    ...(isGitlabIssue(category, context)
+      ? { description: body }
+      : { body, labels: ['user-reported'] }),
   };
 }
 export async function createNewIssue(
@@ -115,7 +118,7 @@ export async function createNewIssue(
     title
   );
   try {
-    const createNewIssueUrl = getNewIssueUrl(category, projectId);
+    const createNewIssueUrl = getNewIssueUrl(category, projectId, context);
     const response = await axios.post(
       '/api/create-issue',
       {
@@ -135,6 +138,6 @@ export async function createNewIssue(
 
 export function issuesUrlList(context: SelectionContext[]) {
   const { project } = extractProjectAndFilepath(context?.[0]?.source);
-  if (!project) return 'https://github.com/slatex/sTeX-React/issues';
+  if (!project) return 'https://github.com/slatex/ALeA/issues';
   return `https://gl.mathhub.info/${project}/-/issues`;
 }
