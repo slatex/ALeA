@@ -165,7 +165,7 @@ export function PerSectionQuiz({
         </IconButton>
       </Box>
       <Box mb="10px">
-        <Box key={problemUri} fragment-uri={problemUri} fragment-kind="Section">
+        <Box key={problemUri} fragment-uri={problemUri} fragment-kind="Problem">
           <UriProblemViewer
             key={problemUri}
             uri={problemUri}
