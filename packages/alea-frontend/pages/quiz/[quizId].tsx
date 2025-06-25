@@ -4,6 +4,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import {
   canAccessResource,
   FTMLProblemWithSolution,
+  getCourseInfo,
   getQuiz,
   GetQuizResponse,
   getUserInfo,
@@ -15,7 +16,7 @@ import { isEmptyResponse } from '@stex-react/quiz-utils';
 import { QuizDisplay } from '@stex-react/stex-react-renderer';
 import {
   Action,
-  COURSES_INFO,
+  CourseInfo,
   CURRENT_TERM,
   isFauId,
   localStore,
@@ -117,6 +118,7 @@ const QuizPage: NextPage = () => {
   const [moderatorPhase, setModeratorPhase] = useState<Phase>(undefined);
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
   const [isModerator, setIsModerator] = useState<boolean>(false);
+  const [allCourses, setAllCourses] = useState<{ [id: string]: CourseInfo } | undefined>(undefined);
   const clientQuizEndTimeMs = getClientEndTimeMs(quizInfo);
   const clientQuizStartTimeMs = getClientStartTimeMs(quizInfo);
 
@@ -203,7 +205,11 @@ const QuizPage: NextPage = () => {
     checkAccess();
   }, [courseId]);
 
-  const { notes } = COURSES_INFO[courseId] || {};
+  useEffect(() => {
+    getCourseInfo().then(setAllCourses);
+  }, []);
+
+  const notesUri = allCourses?.[courseId]?.notes;
 
   if (!quizId) return null;
   if (forceFauLogin) {
@@ -262,7 +268,7 @@ const QuizPage: NextPage = () => {
             }}
           />
         ) : (
-          <Box fragment-uri={notes} fragment-kind="Problem">
+          <Box fragment-uri={notesUri} fragment-kind="Problem">
             <QuizDisplay
               isFrozen={phase !== Phase.STARTED}
               showPerProblemTime={false}
