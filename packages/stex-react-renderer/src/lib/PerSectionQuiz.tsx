@@ -47,7 +47,7 @@ export function UriProblemViewer({
 
   const problemState = getProblemState(isSubmitted, solution, response);
   return (
-    <Box>
+    <Box fragment-uri={uri} fragment-kind="Problem">
       <FTMLFragment
         key={`${uri}-${problemState.type}`}
         fragment={{ type: 'FromBackend', uri }}
