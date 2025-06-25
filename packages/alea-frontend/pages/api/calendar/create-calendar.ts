@@ -18,8 +18,8 @@ function generateCalendarEvents(
 
     for (const entry of entries) {
       const lectureInfo = entry.isQuizScheduled
-        ? '📝 Regular Lecture and Quiz'
-        : '📚 Regular Lecture';
+        ? '📝 Lecture and Quiz'
+        : '📚 Lecture';
       if (entry.lectureEndTimestamp_ms) {
         events.push({
           start: new Date(entry.timestamp_ms),
