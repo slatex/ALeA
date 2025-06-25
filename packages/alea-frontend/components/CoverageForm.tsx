@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { LectureEntry } from '@stex-react/utils';
+import { courseSchedule, LectureEntry } from '@stex-react/utils';
 import dayjs from 'dayjs';
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { SecInfo } from '../types';
@@ -91,6 +91,31 @@ export function CoverageForm({
     });
   }, [formData.slideUri, formData.sectionUri, formData.slideNumber]);
 
+  useEffect(() => {
+    if (!formData.timestamp_ms || formData.timestampStartTs || formData.timestampEndTs) return;
+
+    const schedule = courseSchedule[courseId];
+    if (!schedule) return;
+
+    const dayOfWeek = dayjs(formData.timestamp_ms).day();
+    if (dayOfWeek !== 2 && dayOfWeek !== 3) return;
+
+    const [startHour, startMinute] = schedule.lectureStart.split(':').map(Number);
+    const [endHour, endMinute] = schedule.lectureEnd.split(':').map(Number);
+
+    const startTime = dayjs(formData.timestamp_ms)
+      .set('hour', startHour)
+      .set('minute', startMinute)
+      .valueOf();
+    const endTime = dayjs(formData.timestamp_ms).set('hour', endHour).set('minute', endMinute).valueOf();
+
+    setFormData((prev) => ({
+      ...prev,
+      timestampStartTs: startTime,
+      timestampEndTs: endTime,
+    }));
+  }, [formData.timestamp_ms, courseId]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
@@ -104,16 +129,15 @@ export function CoverageForm({
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const timeValue = e.target.value; 
+    const timeValue = e.target.value;
     const timestampST = formData.timestamp_ms ? dayjs(formData.timestamp_ms) : dayjs();
     const [hours, minutes] = timeValue.split(':').map(Number);
     const updatedTimestamp = timestampST.set('hour', hours).set('minute', minutes).valueOf();
-    console.log('Updated Start Timestamp:', updatedTimestamp);
     setFormData({ ...formData, timestampStartTs: updatedTimestamp });
   };
 
   const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const timeValue = e.target.value; 
+    const timeValue = e.target.value;
     const timestampET = formData.timestamp_ms ? dayjs(formData.timestamp_ms) : dayjs();
     const [hours, minutes] = timeValue.split(':').map(Number);
     const updatedTimestamp = timestampET.set('hour', hours).set('minute', minutes).valueOf();
@@ -208,7 +232,7 @@ export function CoverageForm({
       <Grid item xs={12} md={6}>
         <TextField
           fullWidth
-          label="Start Time"
+          label="Lecture Start Time"
           type="time"
           name="startTime"
           value={dayjs(formData.timestampStartTs).format('HH:mm')}
@@ -221,7 +245,7 @@ export function CoverageForm({
       <Grid item xs={12} md={6}>
         <TextField
           fullWidth
-          label="End Time"
+          label="Lecture End Time"
           type="time"
           name="endTime"
           value={dayjs(formData.timestampEndTs).format('HH:mm')}
