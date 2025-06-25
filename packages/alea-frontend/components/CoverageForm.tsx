@@ -103,6 +103,23 @@ export function CoverageForm({
     setFormData({ ...formData, timestamp_ms: getNoonTimestampOnSameDay(timestamp) });
   };
 
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timeValue = e.target.value; 
+    const timestampST = formData.timestamp_ms ? dayjs(formData.timestamp_ms) : dayjs();
+    const [hours, minutes] = timeValue.split(':').map(Number);
+    const updatedTimestamp = timestampST.set('hour', hours).set('minute', minutes).valueOf();
+    console.log('Updated Start Timestamp:', updatedTimestamp);
+    setFormData({ ...formData, timestampStartTs: updatedTimestamp });
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timeValue = e.target.value; 
+    const timestampET = formData.timestamp_ms ? dayjs(formData.timestamp_ms) : dayjs();
+    const [hours, minutes] = timeValue.split(':').map(Number);
+    const updatedTimestamp = timestampET.set('hour', hours).set('minute', minutes).valueOf();
+    setFormData({ ...formData, timestampEndTs: updatedTimestamp });
+  };
+
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, isQuizScheduled: e.target.checked });
   };
@@ -184,6 +201,32 @@ export function CoverageForm({
           value={formData.clipId}
           onChange={handleChange}
           placeholder="Enter clip ID"
+          variant="outlined"
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="Start Time"
+          type="time"
+          name="startTime"
+          value={dayjs(formData.timestampStartTs).format('HH:mm')}
+          onChange={handleStartTimeChange}
+          placeholder="Enter Start Time"
+          variant="outlined"
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="End Time"
+          type="time"
+          name="endTime"
+          value={dayjs(formData.timestampEndTs).format('HH:mm')}
+          onChange={handleEndTimeChange}
+          placeholder="Enter End Time"
           variant="outlined"
         />
       </Grid>

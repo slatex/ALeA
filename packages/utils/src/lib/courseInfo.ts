@@ -81,6 +81,8 @@ export function createCourseInfo(
 
 export interface LectureEntry {
   timestamp_ms: number;
+  timestampStartTs: number;
+  timestampEndTs: number;
   sectionUri?: string;
   clipId?: string; // https://fau.tv/clip/id/{clipId}
   targetSectionUri?: string;
