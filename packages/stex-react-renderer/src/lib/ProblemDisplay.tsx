@@ -1,18 +1,17 @@
+import { FTMLFragment } from '@kwarc/ftml-react';
+import { FTML } from '@kwarc/ftml-viewer';
 import SaveIcon from '@mui/icons-material/Save';
 import { Box, Button, Card, CircularProgress, IconButton, Typography } from '@mui/material';
 import {
   AnswerUpdateEntry,
-  CognitiveDimension,
   FTMLProblemWithSolution,
   ProblemAnswerEvent,
   ResponseWithSubProblemId,
-  SymbolURI,
   UserInfo,
   createAnswer,
   getUserInfo,
   postAnswerToLMP,
 } from '@stex-react/api';
-import { FTMLFragment, ProblemResponse, ProblemState, Solutions } from '@stex-react/ftml-utils';
 import { MystEditor } from '@stex-react/myst';
 import { useRouter } from 'next/router';
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -49,7 +48,10 @@ function transformData(dimensionAndURI: string[], quotient: number): AnswerUpdat
   return Object.values(conceptUpdate);
 }
 
-function getUpdates(objectives: [CognitiveDimension, SymbolURI][] | undefined, quotient: number) {
+function getUpdates(
+  objectives: [FTML.CognitiveDimension, FTML.SymbolURI][] | undefined,
+  quotient: number
+) {
   if (!objectives) return [];
   const dimensionAndURI = objectives.map(([dim, uri]) => `${dim}:${uri}`);
   return transformData(dimensionAndURI, quotient);
@@ -58,7 +60,7 @@ function getUpdates(objectives: [CognitiveDimension, SymbolURI][] | undefined, q
 function handleSubmit(
   problem: FTMLProblemWithSolution,
   uri: string,
-  response: ProblemResponse,
+  response: FTML.ProblemResponse,
   userId: string
 ) {
   const maxPoint = problem.problem?.total_points ?? 1;
@@ -82,11 +84,11 @@ function handleSubmit(
 export function getProblemState(
   isFrozen: boolean,
   solution?: string,
-  current_response?: ProblemResponse
-): ProblemState {
+  current_response?: FTML.ProblemResponse
+): FTML.ProblemState {
   if (!isFrozen) return { type: 'Interactive', current_response };
   if (!solution) return { type: 'Finished', current_response };
-  const sol = Solutions.from_jstring(solution.replace(/^"|"$/g, ''));
+  const sol = FTML.Solutions.from_jstring(solution.replace(/^"|"$/g, ''));
   const feedback = current_response
     ? sol?.check_response(current_response)
     : sol?.default_feedback();
@@ -101,9 +103,9 @@ export function ProblemViewer({
   r,
 }: {
   problem: FTMLProblemWithSolution;
-  onResponseUpdate?: (response: ProblemResponse) => void;
+  onResponseUpdate?: (response: FTML.ProblemResponse) => void;
   isFrozen: boolean;
-  r?: ProblemResponse;
+  r?: FTML.ProblemResponse;
 }) {
   const problemState = getProblemState(isFrozen, problem.solution, r);
   const { html, uri } = problem.problem;
@@ -115,12 +117,14 @@ export function ProblemViewer({
   return (
     <FTMLFragment
       key={uri}
-      fragment={{ html, uri }}
+      fragment={{ type: 'HtmlString', html, uri }}
       allowHovers={isFrozen}
       problemStates={problemStates}
       onProblem={(response) => {
         onResponseUpdate?.(response);
       }}
+      /*
+       TODO (Behrooz): This is needed only for non-autogradable problems.
       onFragment={(problemId, kind) => {
         if (kind.type === 'Problem') {
           return (ch) => (
@@ -137,6 +141,7 @@ export function ProblemViewer({
           );
         }
       }}
+      */
     />
   );
 }
@@ -227,9 +232,9 @@ export function ProblemDisplay({
   uri?: string;
   problem: FTMLProblemWithSolution | undefined;
   isFrozen: boolean;
-  r?: ProblemResponse;
+  r?: FTML.ProblemResponse;
   showPoints?: boolean;
-  onResponseUpdate?: (r: ProblemResponse) => void;
+  onResponseUpdate?: (r: FTML.ProblemResponse) => void;
   onFreezeResponse?: () => void;
 }) {
   const [userId, setUserId] = useState('');

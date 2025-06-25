@@ -1,7 +1,10 @@
+import { FTMLFragment } from '@kwarc/ftml-react';
+import { FTML } from '@kwarc/ftml-viewer';
 import { VideoCameraBack } from '@mui/icons-material';
 import ArticleIcon from '@mui/icons-material/Article';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import {
+  canAccessResource,
   ClipData,
   ClipInfo,
   getCourseInfo,
@@ -11,17 +14,22 @@ import {
   getSlideUriToIndexMapping,
   SectionInfo,
   Slide,
-  TOCElem,
 } from '@stex-react/api';
 import { CommentNoteToggleView } from '@stex-react/comments';
-import { FTMLFragment, injectCss } from '@stex-react/ftml-utils';
 import { SafeHtml } from '@stex-react/react-utils';
 import {
   ContentDashboard,
   LayoutWithFixedMenu,
   SectionReview,
 } from '@stex-react/stex-react-renderer';
-import { CourseInfo, localStore, shouldUseDrawer } from '@stex-react/utils';
+import {
+  Action,
+  CourseInfo,
+  CURRENT_TERM,
+  localStore,
+  ResourceName,
+  shouldUseDrawer,
+} from '@stex-react/utils';
 import axios from 'axios';
 import { NextPage } from 'next';
 import Link from 'next/link';
@@ -31,13 +39,14 @@ import { getSlideUri, SlideDeck } from '../../components/SlideDeck';
 import { SlidesUriToIndexMap, VideoDisplay } from '../../components/VideoDisplay';
 import { getLocaleObject } from '../../lang/utils';
 import MainLayout from '../../layouts/MainLayout';
+import QuizComponent from 'packages/alea-frontend/components/GenerateQuiz';
 
 function RenderElements({ elements }: { elements: string[] }) {
   return (
     <>
       {elements.map((e, idx) => (
         <Fragment key={idx}>
-          <FTMLFragment fragment={{ html: e }} />
+          <FTMLFragment fragment={{ type: 'HtmlString', html: e }} />
           {idx < elements.length - 1 && <br />}
         </Fragment>
       ))}
@@ -116,7 +125,7 @@ export function setSlideNumAndSectionId(router: NextRouter, slideNum: number, se
   router.push({ pathname, query });
 }
 
-function getSections(tocElems: TOCElem[]): string[] {
+function getSections(tocElems: FTML.TOCElem[]): string[] {
   const sectionIds: string[] = [];
   for (const tocElem of tocElems) {
     if (tocElem.type === 'Section') {
@@ -130,9 +139,9 @@ function getSections(tocElems: TOCElem[]): string[] {
 }
 
 function findSection(
-  toc: TOCElem[],
+  toc: FTML.TOCElem[],
   sectionId: string
-): Extract<TOCElem, { type: 'Section' }> | undefined {
+): Extract<FTML.TOCElem, { type: 'Section' }> | undefined {
   for (const tocElem of toc) {
     if (tocElem.type === 'Section' && tocElem.id === sectionId) {
       return tocElem;
@@ -181,8 +190,9 @@ const CourseViewPage: NextPage = () => {
   const [timestampSec, setTimestampSec] = useState(0);
   const [autoSync, setAutoSync] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [toc, setToc] = useState<TOCElem[]>([]);
+  const [toc, setToc] = useState<FTML.TOCElem[]>([]);
   const [currentSlideUri, setCurrentSlideUri] = useState<string>('');
+  const [isQuizMaker, setIsQUizMaker] = useState(false);
 
   const selectedSectionTOC = useMemo(() => {
     return findSection(toc, sectionId);
@@ -191,6 +201,18 @@ const CourseViewPage: NextPage = () => {
   const handleVideoLoad = (status) => {
     setVideoLoaded(status);
   };
+
+  useEffect(() => {
+    if (!courseId) return;
+    const checkAccess = async () => {
+      const hasAccess = await canAccessResource(ResourceName.COURSE_QUIZ, Action.MUTATE, {
+        courseId,
+        instanceId: CURRENT_TERM,
+      });
+      setIsQUizMaker(hasAccess);
+    };
+    checkAccess();
+  }, [courseId]);
 
   useEffect(() => {
     getCourseInfo().then(setCourses);
@@ -204,7 +226,7 @@ const CourseViewPage: NextPage = () => {
     getDocumentSections(notes).then(([css, toc]) => {
       setToc(toc);
       setCourseSections(getSections(toc));
-      for (const e of css) injectCss(e);
+      for (const e of css) FTML.injectCss(e);
     });
     getSlideCounts(courseId).then(setSlideCounts);
     getSlideUriToIndexMapping(courseId).then(setSlidesUriToIndexMap);
@@ -389,6 +411,13 @@ const CourseViewPage: NextPage = () => {
                   sectionUri={selectedSectionTOC.uri}
                   sectionTitle={selectedSectionTOC.title}
                 />
+                {isQuizMaker && (
+                  <QuizComponent
+                    courseId={courseId}
+                    sectionId={sectionId}
+                    sectionUri={selectedSectionTOC.uri}
+                  />
+                )}
               </Box>
             )}
             <CommentNoteToggleView

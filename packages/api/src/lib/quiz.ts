@@ -1,4 +1,4 @@
-import { CSS, FTMLProblem, ProblemResponse } from './flams-types';
+import { FTML } from '@kwarc/ftml-viewer';
 
 export enum Phase {
   UNSET = 'UNSET',
@@ -21,7 +21,7 @@ export interface FTMLProblemWithSolution {
   solution?: string;
 }
 
-export interface FTMLProblemWithSubProblems extends FTMLProblem {
+export interface FTMLProblemWithSubProblems extends FTML.QuizProblem {
   subProblems?: SubProblemData[];
 }
 
@@ -38,7 +38,7 @@ export interface QuizWithStatus {
 
   title: string;
   problems: Record<string, FTMLProblemWithSolution>;
-  css: CSS[];
+  css: FTML.CSS[];
 
   recorrectionInfo?: RecorrectionInfo[];
 
@@ -110,7 +110,7 @@ export interface ProblemInfo {
   duration_ms: number;
   url: string;
   points: number | undefined;
-  response: ProblemResponse;
+  response: FTML.ProblemResponse;
 }
 
 export interface QuizResult {
@@ -132,16 +132,16 @@ export interface GetQuizResponse {
   feedbackReleaseTs?: number;
 
   phase: Phase;
-  css: CSS[];
+  css: FTML.CSS[];
 
   problems: { [problemId: string]: FTMLProblemWithSolution };
-  responses: { [problemId: string]: ProblemResponse };
+  responses: { [problemId: string]: FTML.ProblemResponse };
 }
 
 export interface InsertAnswerRequest {
   quizId: string;
   problemId: string;
-  responses: ProblemResponse;
+  responses: FTML.ProblemResponse;
 
   browserTimestamp_ms: number;
 }
@@ -164,7 +164,7 @@ export interface QuizStubInfo {
   quizStartTs: number;
   quizEndTs: number;
   title: string;
-  css: CSS[];
+  css: FTML.CSS[];
 }
 
 export function getTotalElapsedTime(events: TimerEvent[]) {
