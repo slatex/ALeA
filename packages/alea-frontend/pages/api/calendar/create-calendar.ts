@@ -120,7 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const calendar = ical({
-    name: `Personal Calendar for ${userId}`,
+    name: `ALeA Calendar for ${userId}`,
     timezone: 'Europe/Berlin',
   });
 
