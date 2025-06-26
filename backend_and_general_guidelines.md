@@ -69,6 +69,91 @@ Use joins in SQL queries or leverage ORM features to reduce the number of databa
 ### 2.6.3. Use transactions when appropriate
 Implement transactions for sets of related database operations to maintain consistency in case of partial failures.
 
+## 2.7. Returning API errors outside handler
+There are some common operations that are performed by several APIs such as checking the request type ('GET' or 'POST'), retrieving user id from token or running a database query. In such scenarios we can create two kinds of helper functions. Lets call them `error-finders` and `error-senders`. The difference between the two is that `error-finders` would just return an appropriate value to indicate error but an `error-sender` would make a `res.status` call to send the error in the API response. 
+
+Such functions (`error-senders`) are tricky to get right, so **we try to avoid creating such functions unless they are used many-many times**. The following a sample `error-handler`. 
+```typescript
+function checkIfPostOrSetError(req, res) {
+  if (req.method !== 'POST') {
+    res.status(405).send({ message: `Only ${type} requests allowed` });
+    return false;
+  }
+  return true;
+}
+```
+
+### 2.7.1. `error-senders` must return a `falsy` value
+This is to ensure that the API handler that called this function can early return based on the returned value. **This early return is crucial to ensure that the API handler only makes one `res.status` call. Multiple `res.status` calls in the same API handler can result in undefined behaviour and hard-to-debug errors.**
+
+### 2.7.2. `error-senders` must have something similar to `SetError` in the name so that the caller knows to return early
+You should also try to specify the error being returned. e.g. `executeAndEndSet500OnError`
+
+### 2.7.3. Create `error-sender` from `error-finder` when appropriate
+There are some scenarios where it is useful to have both kinds of functions. In such cases, use the `error-finder` to create the `error-sender`. For example, consider the following :
+```javascript
+/* error-finder */
+export async function getUserId(req: NextApiRequest) {
+  const userInfo = await getUserInfo(req);
+  if(!userInfo) return undefined;   // In case of error in getting userInfo, return `undefined`
+  return userInfo.userId; 
+}
+
+/* error-sender */
+export async function getUserIdOrSetError(req, res) {
+  const userId = await getUserId(req);
+  if (!userId) res.status(403).send({ message: 'Could not get userId' });
+  return userId;
+}
+```
+For most APIs, the `error-sender` would suffice. But some APIs which behave differently based on whether user is logged-in or not, the `eeor-finder` does the job. 
+
+### 2.7.4. Don't make a function both an `error-reporter` and `error-sender`
+```diff
+- function getFauEmail(req, res) {
+-   const { userId }  = await decode token(req);
+-   if(!userId) {
+-      res.status(403).end();
+-      return undefined;
+-   }
+-   if (userId.length!==8) return {error: 'Not FAU ID'};
+-   return `{userId}@fau.de`;
+- }
+```
+This will make it tricky for the caller to do error handling while ensuring the `res.status` is called just once.
+
+### 2.7.5. Composition of `error-senders`
+**If a helper function uses an `error-sender` it becomes an `error-sender` itself and all the above guidelines must be applied to it.**
+Consider the following incorrectly written helper function:
+
+```diff
+-export async function addRemoveMember(memberId: string, aclId: string, req, res) {
+-  const userId = await getUserIdOrSetError(req, res);
+-  if (!userId) return;
+-  if (!aclId || !memberId) {
+-    return {error: 422}
+-  } 
+-  ...
+-  return true;
+-}
+```
+
+Consider how the caller of this function will have to take care of the error cases and ensure a single `res.status` call. This complication arises because this now both an `error-finder` and an `error-sender`. The following is well composed `error-sender`
+
+```diff
++export async function getUserIdIfAnyAuthorizedOrSetError(
++  req: NextApiRequest,
++  res: NextApiResponse,
++  resourceActions: ResourceActionParams[]
++) {
++  const userId = await getUserIdOrSetError(req, res);
++  if (!userId) return;
++  if (await isUserIdAuthorizedForAny(userId, resourceActions)) return userId;
++
++  return res.status(403).send('unauthorized');
++}
+```
+
 # 3. API Specifications
 Document API specifications to facilitate frontend usage.
 
