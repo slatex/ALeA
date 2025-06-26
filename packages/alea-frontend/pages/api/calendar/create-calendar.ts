@@ -1,7 +1,6 @@
-import { Action, LectureEntry } from '@stex-react/utils';
+import { Action, LectureEntry, semesterPeriods } from '@stex-react/utils';
 import ical, { ICalEventData } from 'ical-generator';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { semesterPeriods } from '../../../constants/semester-dates';
 import { getCoverageData } from '../get-coverage-timeline';
 import { getAuthorizedCourseResources } from '../get-resources-for-user';
 
