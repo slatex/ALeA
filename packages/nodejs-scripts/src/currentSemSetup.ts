@@ -6,7 +6,7 @@ function isHoliday(date: Date, holidays: Holiday[]) {
   return holidays.some((h) => h.date === dateString);
 }
 
-function semesterSetup() {
+function currentSemSetup() {
   const sem = semesterPeriods[CURRENT_TERM];
   if (!sem) throw new Error(`Semester ${CURRENT_TERM} not found in semesterPeriods.`);
   const holidays = sem.holidays;
@@ -52,8 +52,8 @@ function semesterSetup() {
   return lectureEntriesByCourse;
 }
 
-export async function semesterSetupScript() {
-  const lectureEntries = semesterSetup();
+export async function currentSemSetupScript() {
+  const lectureEntries = currentSemSetup();
   const outputPath = process.env.RECORDED_SYLLABUS_DIR + '/current-sem.json';
   try {
     await writeFile(outputPath, JSON.stringify(lectureEntries, null, 2));
