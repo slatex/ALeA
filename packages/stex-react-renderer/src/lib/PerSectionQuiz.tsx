@@ -5,9 +5,10 @@ import { Box, Button, IconButton, LinearProgress, Tooltip, Typography } from '@m
 import {
   getDefiniedaInSection,
   getQueryResults,
+  getSectionDependencies,
   getSourceUrl,
   getSparqlQueryForLoRelationToDimAndConceptPair,
-  getSparqlQueryForLoRelationToNonDimConcept,
+  SectionInfo,
 } from '@stex-react/api';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -21,6 +22,46 @@ export function handleViewSource(problemUri: string) {
     if (sourceLink) window.open(sourceLink, '_blank');
   });
 }
+function getSections(tocElems: FTML.TOCElem[]): string[] {
+  const sectionIds: string[] = [];
+  for (const tocElem of tocElems) {
+    if (tocElem.type === 'Section') {
+      sectionIds.push(tocElem.uri);
+    }
+    if ('children' in tocElem) {
+      sectionIds.push(...getSections(tocElem.children));
+    }
+  }
+  return sectionIds;
+}
+export async function getAllConceptUrisForCourse(
+  courseToc: FTML.TOCElem[] | undefined
+): Promise<Set<string>> {
+  if (!courseToc) {
+    return new Set<string>();
+  }
+  const sectionInfos = getSections(courseToc);
+  const flattenSections = (
+    sections: SectionInfo | SectionInfo[] | undefined
+  ): { uri: string }[] => {
+    if (!sections) return [];
+    if (Array.isArray(sections)) {
+      return sections.flatMap((s) => [{ uri: s.uri }, ...flattenSections(s.children)]);
+    }
+    return [{ uri: sections.uri }, ...flattenSections(sections.children)];
+  };
+  const allSections = sectionInfos.map((uri) => ({ uri }));
+  const sectionUris = allSections.map((info) => info.uri);
+  const conceptUris = new Set<string>();
+
+  for (const sectionUri of sectionUris) {
+    const defidenda = await getDefiniedaInSection(sectionUri);
+    defidenda.forEach((d) => conceptUris.add(d.conceptUri));
+    const deps = await getSectionDependencies(sectionUri);
+    deps.forEach((uri) => conceptUris.add(uri));
+  }
+  return conceptUris;
+}
 
 async function getLoRelationConceptUris(problemUri: string): Promise<string[]> {
   const query = getSparqlQueryForLoRelationToDimAndConceptPair(problemUri);
@@ -30,45 +71,36 @@ async function getLoRelationConceptUris(problemUri: string): Promise<string[]> {
 
   result?.results?.bindings.forEach((binding) => {
     const raw = binding.relatedData?.value;
-    console.log('🔍 Raw related data:', raw);
     if (!raw) return;
-
     const parts = raw.split('; ').map((p) => p.trim());
-    
     const poSymbolUris = parts
       .filter((data) => data.startsWith('http://mathhub.info/ulo#po-symbol='))
       .map((data) => decodeURIComponent(data.split('#po-symbol=')[1]));
 
     conceptUris.push(...poSymbolUris);
   });
-
   return conceptUris;
 }
 
-export async function getSyllabusAndAdventurousProblems(sectionUri: string) {
-  const defidenda = await getDefiniedaInSection(sectionUri);
-  const defidendaConceptUris = new Set(defidenda.map((d) => d.conceptUri)); // No normalization
-  console.log('🔍 Defidenda concept URIs:', defidendaConceptUris);
-
+export async function getSyllabusAndAdventurousProblems(
+  sectionUri: string,
+  courseToc?: FTML.TOCElem
+) {
+  const conceptUrisFromCourse = await getAllConceptUrisForCourse(
+    courseToc ? (Array.isArray(courseToc) ? courseToc : [courseToc]) : undefined
+  );
   const allProblems: string[] = (
     await axios.get(`/api/get-problems-by-section?sectionUri=${encodeURIComponent(sectionUri)}`)
   ).data;
 
   const syllabus: string[] = [];
   const adventurous: string[] = [];
-
   for (const problemUri of allProblems) {
     const dimConceptUris = await getLoRelationConceptUris(problemUri);
-    console.log(`🔍 DIMM concept URIs for ${problemUri}:`, dimConceptUris);
-    const isSyllabus = dimConceptUris.some((uri) => defidendaConceptUris.has(uri));
-
-    if (isSyllabus) {
-      syllabus.push(problemUri);
-    } else {
-      adventurous.push(problemUri);
-    }
+    const isSyllabus = dimConceptUris.some((uri) => conceptUrisFromCourse.has(uri));
+    if (isSyllabus) syllabus.push(problemUri);
+    else adventurous.push(problemUri);
   }
-
   return { syllabus, adventurous };
 }
 

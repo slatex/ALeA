@@ -18,7 +18,9 @@ import {
   ConceptAndDefinition,
   NumericCognitiveValues,
   SHOW_DIMENSIONS,
+  getCourseInfo,
   getDefiniedaInSection,
+  getDocumentSections,
   getUriWeights,
   isLoggedIn,
 } from '@stex-react/api';
@@ -31,6 +33,7 @@ import PracticeProblem from './PracticeProblem';
 import { getLocaleObject } from './lang/utils';
 import { DimIcon } from './stex-react-renderer';
 import styles from './styles/competency-indicator.module.scss';
+import { FTML } from '@kwarc/ftml-viewer';
 
 function CompetencyBar({ dim, val }: { dim: BloomDimension; val: number }) {
   const hue = 120 * val;
@@ -63,6 +66,10 @@ const SectionReview = ({
   const [URIs, setURIs] = useState<string[]>([]);
   const t = getLocaleObject(useRouter());
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(false);
+  const [courses, setCourses] = useState<any>([]);
+  const [courseToc, setCourseToc] = useState<any>([]);
+  const router = useRouter();
+  const courseId = router.query.courseId as string;
 
   useEffect(() => {
     if (!isLoggedIn()) return;
@@ -75,6 +82,19 @@ const SectionReview = ({
     setURIs(URIs);
     getUriWeights(URIs).then((data) => setCompetencyData(data));
   }, [definedConcepts]);
+  useEffect(() => {
+    getCourseInfo().then(setCourses);
+  }, []);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const notes = courses?.[courseId]?.notes;
+    if (!notes) return;
+    getDocumentSections(notes).then(([css, toc]) => {
+      setCourseToc(toc);
+    });
+  }, [courseId, router.isReady, courses]);
 
   function refetchCompetencyData() {
     if (!URIs?.length) return;
@@ -129,6 +149,7 @@ const SectionReview = ({
           </Box>
           <PracticeProblem
             sectionUri={sectionUri}
+            courseToc={courseToc}
             showHideButton={true}
             isAccordionOpen={isAccordionExpanded}
           />

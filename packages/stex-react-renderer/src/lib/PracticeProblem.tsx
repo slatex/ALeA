@@ -6,15 +6,18 @@ import React, { useEffect, useState } from 'react';
 import { ForMe } from './ForMe';
 import { getLocaleObject } from './lang/utils';
 import { getSyllabusAndAdventurousProblems, PerSectionQuiz } from './PerSectionQuiz';
+import { FTML } from '@kwarc/ftml-viewer';
 
 interface PracticeProblemProps {
   sectionUri: string;
+  courseToc: FTML.TOCElem;
   showHideButton?: boolean;
   isAccordionOpen?: boolean;
 }
 
 const PracticeProblem: React.FC<PracticeProblemProps> = ({
   sectionUri,
+  courseToc,
   showHideButton,
   isAccordionOpen,
 }) => {
@@ -24,12 +27,9 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   const [tabValue, setTabValue] = useState(0);
 
   // Caching states
-  const [perSectionProblemUris, setPerSectionProblemUris] = useState<string[] | null>(null);
   const [formeProblemUris, setFormeProblemUris] = useState<string[] | null>(null);
   const [syllabusUris, setSyllabusUris] = useState<string[] | null>(null);
   const [adventurousUris, setAdventurousUris] = useState<string[] | null>(null);
-  const [allProblemUris, setAllProblemUris] = useState<string[] | null>(null);
-
   const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   }, []);
@@ -38,35 +38,49 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   const [perSectionTabLabel, setPerSectionTabLabel] = useState(
     t.perSectionQuizButton.replace('$1', '...')
   );
-
+  const [adventurousTabLabel, setAdventurousTabLabel] = useState(
+    t.adventurousproblems.replace('$1', '...')
+  );
   useEffect(() => {
     if (!sectionUri) return;
-    setPerSectionProblemUris(null);
     setFormeProblemUris(null);
+    setSyllabusUris(null);
+    setAdventurousUris(null);
     setForMeTabLabel(t.ForMe.replace('$1', '...'));
     setPerSectionTabLabel(t.perSectionQuizButton.replace('$1', '...'));
+    setAdventurousTabLabel(t.adventurousproblems.replace('$1', '...'));
   }, [sectionUri]);
 
   useEffect(() => {
     if (formeProblemUris?.length) {
       setForMeTabLabel(t.ForMe.replace('$1', formeProblemUris.length.toString()));
     }
-    if (perSectionProblemUris?.length) {
-      setPerSectionTabLabel(
-        t.perSectionQuizButton.replace('$1', perSectionProblemUris.length.toString())
+    if (syllabusUris?.length) {
+      setPerSectionTabLabel(t.perSectionQuizButton.replace('$1', syllabusUris.length.toString()));
+    }
+    if (adventurousUris?.length) {
+      setAdventurousTabLabel(
+        t.adventurousproblems.replace('$1', adventurousUris.length.toString())
       );
     }
-  }, [formeProblemUris, perSectionProblemUris, t.ForMe, t.perSectionQuizButton]);
-
+  }, [
+    formeProblemUris,
+    syllabusUris,
+    adventurousUris,
+    t.ForMe,
+    t.perSectionQuizButton,
+    t.adventurousproblems,
+  ]);
   useEffect(() => {
     if (!sectionUri) return;
 
-    getSyllabusAndAdventurousProblems(sectionUri).then(({ syllabus, adventurous}) => {
-      setSyllabusUris(syllabus);
-      setAdventurousUris(adventurous);
-     
-    });
-  }, [sectionUri]);
+    if (syllabusUris === null || adventurousUris === null) {
+      getSyllabusAndAdventurousProblems(sectionUri, courseToc).then(({ syllabus, adventurous }) => {
+        if (syllabusUris === null) setSyllabusUris(syllabus);
+        if (adventurousUris === null) setAdventurousUris(adventurous);
+      });
+    }
+  }, [sectionUri, courseToc]);
 
   useEffect(() => {
     if (isAccordionOpen) {
@@ -145,7 +159,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
             >
               <Tab label={forMeTabLabel} />
               <Tab label={perSectionTabLabel} />
-              <Tab label="I'm feeling adventurous" />
+              <Tab label={adventurousTabLabel} />
             </Tabs>
             <VisibilityOffIcon
               onClick={() => setShowProblems(false)}
@@ -164,27 +178,27 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
               />
             </Box>
           )}
-         {tabValue === 1 && (
+          {tabValue === 1 && (
             <Box mb={2}>
-          <PerSectionQuiz
-            sectionUri={sectionUri}
-            cachedProblemUris={syllabusUris}
-            showHideButton={false}
-            showButtonFirst={false}
-            setCachedProblemUris={setSyllabusUris}
-          />
-          </Box>
+              <PerSectionQuiz
+                sectionUri={sectionUri}
+                cachedProblemUris={syllabusUris}
+                showHideButton={false}
+                showButtonFirst={false}
+                setCachedProblemUris={setSyllabusUris}
+              />
+            </Box>
           )}
 
-          {tabValue === 2 && adventurousUris && (
+          {tabValue === 2 && (
             <Box mb={2}>
-            <PerSectionQuiz
-              sectionUri={sectionUri}
-              cachedProblemUris={adventurousUris}
-              showHideButton={false}
-              showButtonFirst={false}
-              setCachedProblemUris={setAdventurousUris}
-            />
+              <PerSectionQuiz
+                sectionUri={sectionUri}
+                cachedProblemUris={adventurousUris}
+                showHideButton={false}
+                showButtonFirst={false}
+                setCachedProblemUris={setAdventurousUris}
+              />
             </Box>
           )}
 
