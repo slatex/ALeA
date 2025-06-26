@@ -16,36 +16,34 @@ function currentSemSetup() {
 
   const lectureEntriesByCourse: CoverageTimeline = {};
   courses.forEach((c) => (lectureEntriesByCourse[c.courseId] = []));
-
   const currentDate = new Date(startDate);
-  const dates = [];
   while (currentDate <= endDate) {
-    dates.push(new Date(currentDate));
-    if (!isHoliday(currentDate, holidays)) {
-      const day = currentDate.getDay();
-      for (const course of courses) {
-        if (course.dayOfWeek === day) {
-          const lectureDate = new Date(currentDate);
-          const [startHours, startMinutes] = course.startTime.split(':').map(Number);
-          lectureDate.setHours(startHours, startMinutes, 0, 0);
-          const timestamp_ms = lectureDate.getTime();
+    if (isHoliday(currentDate, holidays)) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue;
+    }
+    const day = currentDate.getDay();
+    for (const course of courses) {
+      if (course.dayOfWeek !== day) continue;
+      const lectureDate = new Date(currentDate);
+      const [startHours, startMinutes] = course.startTime.split(':').map(Number);
+      lectureDate.setHours(startHours, startMinutes, 0, 0);
+      const timestamp_ms = lectureDate.getTime();
 
-          const lectureEndDate = new Date(currentDate);
-          const [endHours, endMinutes] = course.endTime.split(':').map(Number);
-          lectureEndDate.setHours(endHours, endMinutes, 0, 0);
-          const lectureEndTimestamp_ms = lectureEndDate.getTime();
+      const lectureEndDate = new Date(currentDate);
+      const [endHours, endMinutes] = course.endTime.split(':').map(Number);
+      lectureEndDate.setHours(endHours, endMinutes, 0, 0);
+      const lectureEndTimestamp_ms = lectureEndDate.getTime();
 
-          lectureEntriesByCourse[course.courseId].push({
-            timestamp_ms,
-            sectionUri: '',
-            targetSectionUri: '',
-            clipId: '',
-            isQuizScheduled: false,
-            slideUri: '',
-            lectureEndTimestamp_ms,
-          });
-        }
-      }
+      lectureEntriesByCourse[course.courseId].push({
+        timestamp_ms,
+        sectionUri: '',
+        targetSectionUri: '',
+        clipId: '',
+        isQuizScheduled: false,
+        slideUri: '',
+        lectureEndTimestamp_ms,
+      });
     }
     currentDate.setDate(currentDate.getDate() + 1);
   }
