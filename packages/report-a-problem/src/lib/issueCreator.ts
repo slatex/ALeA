@@ -16,7 +16,7 @@ export enum IssueCategory {
 }
 export interface SelectionContext {
   fragmentUri: FTML.URI;
-  fragmentKind: 'Section' | 'Paragraph' | 'Slide';
+  fragmentKind: 'Section' | 'Paragraph' | 'Slide' | 'Problem'; // Keep alingned with FTML.FragmentKind
   source?: string;
 }
 async function addSources(context: SelectionContext[]): Promise<SelectionContext[]> {
