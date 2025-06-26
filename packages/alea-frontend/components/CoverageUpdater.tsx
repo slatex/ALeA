@@ -34,8 +34,6 @@ function convertSnapToEntry(snap: LectureEntry, index: number): any {
   return {
     id: `${snap.timestamp_ms}-${index}`,
     timestamp_ms: snap.timestamp_ms,
-    timestampStartTs: snap.timestampStartTs,
-    timestampEndTs: snap.timestampEndTs,
     sectionName: getSectionNameForUri(snap.sectionUri || '', {}),
     sectionUri: snap.sectionUri || '',
     targetSectionName: getSectionNameForUri(snap.targetSectionUri || '', {}),
@@ -45,6 +43,7 @@ function convertSnapToEntry(snap: LectureEntry, index: number): any {
     slideUri: snap.slideUri || '',
     slideNumber: snap.slideNumber,
     autoDetected: snap.autoDetected || undefined,
+    lectureEndTimestamp_ms: snap.lectureEndTimestamp_ms ,
   };
 }
 
@@ -68,13 +67,12 @@ export function CoverageUpdater({
     sectionUri: '',
     clipId: '',
     timestamp_ms: Date.now(),
-    timestampStartTs: undefined,
-    timestampEndTs: undefined,
     targetSectionName: '',
     targetSectionUri: '',
     isQuizScheduled: false,
     slideUri: '',
     slideNumber: undefined as number | undefined,
+    lectureEndTimestamp_ms: Date.now(),
   });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -104,13 +102,12 @@ export function CoverageUpdater({
       sectionUri: '',
       clipId: '',
       timestamp_ms: Date.now(),
-      timestampStartTs:undefined,
-      timestampEndTs: undefined,
       targetSectionName: '',
       targetSectionUri: '',
       isQuizScheduled: false,
       slideUri: '',
       slideNumber: undefined,
+      lectureEndTimestamp_ms: undefined,
     });
     setEditIndex(null);
   };
@@ -118,27 +115,25 @@ export function CoverageUpdater({
   const handleSubmitForm = (formData: any) => {
     const newItem: LectureEntry = {
       timestamp_ms: Date.now(),
-      timestampStartTs: formData.timestampStartTs ,
-      timestampEndTs: formData.timestampEndTs,
       sectionUri: formData.sectionUri,
       targetSectionUri: formData.targetSectionUri,
       clipId: formData.clipId,
       isQuizScheduled: formData.isQuizScheduled,
       slideUri: formData.slideUri,
       slideNumber: formData.slideNumber,
+      lectureEndTimestamp_ms: formData.lectureEndTimestamp_ms,
     };
     setFormData({
       sectionName: '',
       sectionUri: '',
       clipId: '',
       timestamp_ms: Date.now(),
-      timestampStartTs: undefined,
-      timestampEndTs: undefined,
       targetSectionName: '',
       targetSectionUri: '',
       isQuizScheduled: false,
       slideUri: '',
       slideNumber: undefined,
+      lectureEndTimestamp_ms: Date.now(),
     });
     handleSaveSingle(newItem);
   };
