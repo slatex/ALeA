@@ -67,6 +67,7 @@ function CoverageRow({
 }: CoverageRowProps) {
   const now = dayjs();
   const itemDate = dayjs(item.timestamp_ms);
+  const endTime = dayjs(item.lectureEndTimestamp_ms);
   const isPast = itemDate.isBefore(now, 'day');
   const isFuture = itemDate.isAfter(now, 'day');
   const isToday = itemDate.isSame(now, 'day');
@@ -99,16 +100,37 @@ function CoverageRow({
       }}
     >
       <TableCell>
-        <Typography
-          variant="body2"
-          fontWeight="medium"
-          sx={{
-            color: isPast ? 'success.main' : isFuture ? 'warning.main' : 'text.primary',
-            fontWeight: 'bold',
-          }}
+        <NoMaxWidthTooltip
+          title={
+            <Box
+              maxWidth="600px"
+              color="#1a237e"
+              border="1px solid #CCC"
+              p="10px"
+              borderRadius="5px"
+              boxShadow="2px 7px 31px 8px rgba(0, 0, 0, 0.33)"
+            >
+              <Box sx={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+                <Typography fontWeight="bold" mb={1}>
+                  Lecture Timings
+                </Typography>
+                {`${itemDate.format('HH:mm')} - ${endTime.format('HH:mm')}`}
+              </Box>
+            </Box>
+          }
+          arrow
         >
-          {itemDate.format('YYYY-MM-DD')}
-        </Typography>
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            sx={{
+              color: isPast ? 'success.main' : isFuture ? 'warning.main' : 'text.primary',
+              fontWeight: 'bold',
+            }}
+          >
+            {itemDate.format('YYYY-MM-DD')}
+          </Typography>
+        </NoMaxWidthTooltip>
       </TableCell>
       <TableCell
         sx={{
@@ -391,7 +413,7 @@ export function CoverageTable({
         const map: QuizMatchMap = {};
         entries.forEach((entry) => {
           const match = allQuizzes.find(
-            (quiz) => Math.abs(quiz.quizStartTs - entry.timestamp_ms) < 12 * 60 * 60 * 1000
+            (quiz) => Math.abs(quiz.quizStartTs - entry.timestamp_ms) < 6 * 60 * 60 * 1000
           );
           map[entry.timestamp_ms] = match || null;
         });
