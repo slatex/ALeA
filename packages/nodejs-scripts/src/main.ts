@@ -1,4 +1,5 @@
 import { addLectureSchedule } from './addLectureSchedule';
+import { currentSemSetupScript } from './currentSemSetup';
 import { quizLmsInfoWriter } from './quizLmsInfoWriter';
 
 switch (process.env.SCRIPT_NAME) {
@@ -7,6 +8,9 @@ switch (process.env.SCRIPT_NAME) {
     break;
   case 'addLectureSchedule':
     addLectureSchedule();
+    break;
+  case 'currentSemSetup':
+    currentSemSetupScript();
     break;
   default:
     console.log('Invalid script name');
