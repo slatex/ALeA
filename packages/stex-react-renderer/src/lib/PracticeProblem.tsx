@@ -5,19 +5,16 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { ForMe } from './ForMe';
 import { getLocaleObject } from './lang/utils';
-import { getSyllabusAndAdventurousProblems, PerSectionQuiz } from './PerSectionQuiz';
-import { FTML } from '@kwarc/ftml-viewer';
+import { PerSectionQuiz } from './PerSectionQuiz';
 
 interface PracticeProblemProps {
   sectionUri: string;
-  courseToc: FTML.TOCElem;
   showHideButton?: boolean;
   isAccordionOpen?: boolean;
 }
 
 const PracticeProblem: React.FC<PracticeProblemProps> = ({
   sectionUri,
-  courseToc,
   showHideButton,
   isAccordionOpen,
 }) => {
@@ -71,16 +68,6 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
     t.perSectionQuizButton,
     t.adventurousproblems,
   ]);
-  useEffect(() => {
-    if (!sectionUri) return;
-
-    if (syllabusUris === null || adventurousUris === null) {
-      getSyllabusAndAdventurousProblems(sectionUri, courseToc).then(({ syllabus, adventurous }) => {
-        if (syllabusUris === null) setSyllabusUris(syllabus);
-        if (adventurousUris === null) setAdventurousUris(adventurous);
-      });
-    }
-  }, [sectionUri, courseToc]);
 
   useEffect(() => {
     if (isAccordionOpen) {
@@ -186,6 +173,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
                 showHideButton={false}
                 showButtonFirst={false}
                 setCachedProblemUris={setSyllabusUris}
+                category="syllabus"
               />
             </Box>
           )}
@@ -198,6 +186,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
                 showHideButton={false}
                 showButtonFirst={false}
                 setCachedProblemUris={setAdventurousUris}
+                category="adventurous"
               />
             </Box>
           )}

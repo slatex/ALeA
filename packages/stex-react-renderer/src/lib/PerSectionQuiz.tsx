@@ -2,14 +2,7 @@ import { FTMLFragment, getFlamsServer } from '@kwarc/ftml-react';
 import { FTML } from '@kwarc/ftml-viewer';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Button, IconButton, LinearProgress, Tooltip, Typography } from '@mui/material';
-import {
-  getDefiniedaInSection,
-  getQueryResults,
-  getSectionDependencies,
-  getSourceUrl,
-  getSparqlQueryForLoRelationToDimAndConceptPair,
-  SectionInfo,
-} from '@stex-react/api';
+import { getSourceUrl } from '@stex-react/api';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -21,87 +14,6 @@ export function handleViewSource(problemUri: string) {
   getSourceUrl(problemUri).then((sourceLink) => {
     if (sourceLink) window.open(sourceLink, '_blank');
   });
-}
-function getSections(tocElems: FTML.TOCElem[]): string[] {
-  const sectionIds: string[] = [];
-  for (const tocElem of tocElems) {
-    if (tocElem.type === 'Section') {
-      sectionIds.push(tocElem.uri);
-    }
-    if ('children' in tocElem) {
-      sectionIds.push(...getSections(tocElem.children));
-    }
-  }
-  return sectionIds;
-}
-export async function getAllConceptUrisForCourse(
-  courseToc: FTML.TOCElem[] | undefined
-): Promise<Set<string>> {
-  if (!courseToc) {
-    return new Set<string>();
-  }
-  const sectionInfos = getSections(courseToc);
-  const flattenSections = (
-    sections: SectionInfo | SectionInfo[] | undefined
-  ): { uri: string }[] => {
-    if (!sections) return [];
-    if (Array.isArray(sections)) {
-      return sections.flatMap((s) => [{ uri: s.uri }, ...flattenSections(s.children)]);
-    }
-    return [{ uri: sections.uri }, ...flattenSections(sections.children)];
-  };
-  const allSections = sectionInfos.map((uri) => ({ uri }));
-  const sectionUris = allSections.map((info) => info.uri);
-  const conceptUris = new Set<string>();
-
-  for (const sectionUri of sectionUris) {
-    const defidenda = await getDefiniedaInSection(sectionUri);
-    defidenda.forEach((d) => conceptUris.add(d.conceptUri));
-    const deps = await getSectionDependencies(sectionUri);
-    deps.forEach((uri) => conceptUris.add(uri));
-  }
-  return conceptUris;
-}
-
-async function getLoRelationConceptUris(problemUri: string): Promise<string[]> {
-  const query = getSparqlQueryForLoRelationToDimAndConceptPair(problemUri);
-  const result = await getQueryResults(query ?? '');
-
-  const conceptUris: string[] = [];
-
-  result?.results?.bindings.forEach((binding) => {
-    const raw = binding.relatedData?.value;
-    if (!raw) return;
-    const parts = raw.split('; ').map((p) => p.trim());
-    const poSymbolUris = parts
-      .filter((data) => data.startsWith('http://mathhub.info/ulo#po-symbol='))
-      .map((data) => decodeURIComponent(data.split('#po-symbol=')[1]));
-
-    conceptUris.push(...poSymbolUris);
-  });
-  return conceptUris;
-}
-
-export async function getSyllabusAndAdventurousProblems(
-  sectionUri: string,
-  courseToc?: FTML.TOCElem
-) {
-  const conceptUrisFromCourse = await getAllConceptUrisForCourse(
-    courseToc ? (Array.isArray(courseToc) ? courseToc : [courseToc]) : undefined
-  );
-  const allProblems: string[] = (
-    await axios.get(`/api/get-problems-by-section?sectionUri=${encodeURIComponent(sectionUri)}`)
-  ).data;
-
-  const syllabus: string[] = [];
-  const adventurous: string[] = [];
-  for (const problemUri of allProblems) {
-    const dimConceptUris = await getLoRelationConceptUris(problemUri);
-    const isSyllabus = dimConceptUris.some((uri) => conceptUrisFromCourse.has(uri));
-    if (isSyllabus) syllabus.push(problemUri);
-    else adventurous.push(problemUri);
-  }
-  return { syllabus, adventurous };
 }
 
 export function UriProblemViewer({
@@ -160,12 +72,14 @@ export function PerSectionQuiz({
   showHideButton = false,
   cachedProblemUris,
   setCachedProblemUris,
+  category,
 }: {
   sectionUri: string;
   showButtonFirst?: boolean;
   showHideButton?: boolean;
   cachedProblemUris?: string[] | null;
   setCachedProblemUris?: (uris: string[]) => void;
+  category?: 'syllabus' | 'adventurous';
 }) {
   const t = getLocaleObject(useRouter()).quiz;
   const [problemUris, setProblemUris] = useState<string[]>(cachedProblemUris || []);
@@ -176,23 +90,32 @@ export function PerSectionQuiz({
   const [show, setShow] = useState(true);
   const [showSolution, setShowSolution] = useState(false);
   const [startQuiz, setStartQuiz] = useState(!showButtonFirst);
+  const courseId = useRouter().query.courseId as string;
 
   useEffect(() => {
     if (cachedProblemUris) return;
     //  if (!sectionUri) return;
     setIsLoadingProblemUris(true);
     axios
-      .get(`/api/get-problems-by-section?sectionUri=${encodeURIComponent(sectionUri)}`)
+      .get(
+        `/api/get-problems-by-section?sectionUri=${encodeURIComponent(
+          sectionUri
+        )}&courseId=${courseId}`
+      )
       .then((resp) => {
-        setProblemUris(resp.data);
+        const filtered = resp.data
+          .filter((p: any) => p.category === category)
+          .map((p: any) => p.problemId);
+
+        setProblemUris(filtered);
         if (setCachedProblemUris) {
-          setCachedProblemUris(resp.data);
+          setCachedProblemUris(filtered);
         }
         setIsLoadingProblemUris(false);
-        setIsSubmitted(resp.data.map(() => false));
-        setResponses(resp.data.map(() => undefined));
+        setIsSubmitted(filtered.map(() => false));
+        setResponses(filtered.map(() => undefined));
       }, console.error);
-  }, [sectionUri, cachedProblemUris, setCachedProblemUris]);
+  }, [sectionUri, cachedProblemUris, setCachedProblemUris, category]);
 
   if (isLoadingProblemUris) return <LinearProgress />;
   if (!problemUris.length) {
