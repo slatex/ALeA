@@ -22,6 +22,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   const router = useRouter();
   const { quiz: t } = getLocaleObject(router);
   const [tabValue, setTabValue] = useState(0);
+  const courseId = router.query.courseId as string | undefined;
 
   // Caching states
   const [formeProblemUris, setFormeProblemUris] = useState<string[] | null>(null);
@@ -70,15 +71,19 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   ]);
 
   useEffect(() => {
-    if (isAccordionOpen) {
-      if (!sectionUri) return;
-      setShowProblems(true);
-      setTabValue(0);
-      setTimeout(() => setTabValue(1), 0);
-    }
-  }, [isAccordionOpen, sectionUri]);
+    if (!sectionUri || !courseId) return;
+
+    setShowProblems(true);
+    setTabValue(0);
+    setTimeout(() => setTabValue(1), 0);
+  }, [isAccordionOpen, sectionUri, courseId]);
+
   if (isAccordionOpen) {
+    const isLoadingAny =
+      formeProblemUris === null || syllabusUris === null || adventurousUris === null;
+
     if (
+      !isLoadingAny &&
       (formeProblemUris?.length ?? 0) === 0 &&
       (syllabusUris?.length ?? 0) === 0 &&
       (adventurousUris?.length ?? 0) === 0
@@ -174,6 +179,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
                 showButtonFirst={false}
                 setCachedProblemUris={setSyllabusUris}
                 category="syllabus"
+                courseId={courseId ?? ''}
               />
             </Box>
           )}
@@ -187,6 +193,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
                 showButtonFirst={false}
                 setCachedProblemUris={setAdventurousUris}
                 category="adventurous"
+                courseId={courseId ?? ''}
               />
             </Box>
           )}

@@ -73,6 +73,7 @@ export function PerSectionQuiz({
   cachedProblemUris,
   setCachedProblemUris,
   category,
+  courseId,
 }: {
   sectionUri: string;
   showButtonFirst?: boolean;
@@ -80,6 +81,7 @@ export function PerSectionQuiz({
   cachedProblemUris?: string[] | null;
   setCachedProblemUris?: (uris: string[]) => void;
   category?: 'syllabus' | 'adventurous';
+  courseId: string;
 }) {
   const t = getLocaleObject(useRouter()).quiz;
   const [problemUris, setProblemUris] = useState<string[]>(cachedProblemUris || []);
@@ -90,7 +92,6 @@ export function PerSectionQuiz({
   const [show, setShow] = useState(true);
   const [showSolution, setShowSolution] = useState(false);
   const [startQuiz, setStartQuiz] = useState(!showButtonFirst);
-  const courseId = useRouter().query.courseId as string;
 
   useEffect(() => {
     if (cachedProblemUris) return;
