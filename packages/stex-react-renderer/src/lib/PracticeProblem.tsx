@@ -22,7 +22,7 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
   const router = useRouter();
   const { quiz: t } = getLocaleObject(router);
   const [tabValue, setTabValue] = useState(0);
-  const courseId = router.query.courseId as string | undefined;
+  const courseId = router.query.courseId as string;
 
   // Caching states
   const [formeProblemUris, setFormeProblemUris] = useState<string[] | null>(null);
@@ -174,12 +174,12 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
             <Box mb={2}>
               <PerSectionQuiz
                 sectionUri={sectionUri}
+                courseId={courseId}
                 cachedProblemUris={syllabusUris}
                 showHideButton={false}
                 showButtonFirst={false}
                 setCachedProblemUris={setSyllabusUris}
                 category="syllabus"
-                courseId={courseId ?? ''}
               />
             </Box>
           )}
@@ -188,12 +188,12 @@ const PracticeProblem: React.FC<PracticeProblemProps> = ({
             <Box mb={2}>
               <PerSectionQuiz
                 sectionUri={sectionUri}
+                courseId={courseId}
                 cachedProblemUris={adventurousUris}
                 showHideButton={false}
                 showButtonFirst={false}
                 setCachedProblemUris={setAdventurousUris}
                 category="adventurous"
-                courseId={courseId ?? ''}
               />
             </Box>
           )}
