@@ -22,8 +22,8 @@ import { LectureEntry } from '@stex-react/utils';
 import dayjs from 'dayjs';
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { SecInfo } from '../types';
-import { getNoonTimestampOnSameDay } from './CoverageUpdater';
 import { SlidePicker } from './SlideSelector';
+import { getSlides } from '@stex-react/api';
 
 export type FormData = LectureEntry & {
   sectionName: string;
@@ -78,6 +78,19 @@ export function CoverageForm({
     }
   }, [formData, secInfo]);
 
+  useEffect(() => {
+    if (!formData.slideUri || !formData.sectionUri || formData.slideNumber !== undefined) return;
+    const section = secInfo[formData.sectionUri];
+    if (!section) return;
+    getSlides(courseId, section.id).then(({ slides }) => {
+      const index = slides.findIndex((s) => s.slide?.uri === formData.slideUri);
+      if (index >= 0) {
+        handleSlideUriChange(formData.slideUri, index);
+      }
+    });
+  }, [formData.slideUri, formData.sectionUri, formData.slideNumber]);
+
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
@@ -87,7 +100,20 @@ export function CoverageForm({
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const timestamp = Date.parse(e.target.value);
-    setFormData({ ...formData, timestamp_ms: getNoonTimestampOnSameDay(timestamp) });
+    setFormData({ ...formData, timestamp_ms: timestamp });
+  };
+
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [hours, minutes] = e.target.value.split(':').map(Number);
+    const updatedTimestamp_ms = dayjs(formData.timestamp_ms).set('hour', hours).set('minute', minutes).valueOf();
+    setFormData({ ...formData, timestamp_ms: updatedTimestamp_ms });
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [hours, minutes] = e.target.value.split(':').map(Number);
+    const endTime = dayjs(formData.lectureEndTimestamp_ms || formData.timestamp_ms);
+    const updatedLectureEndTimestamp = endTime.set('hour', hours).set('minute', minutes).valueOf();
+    setFormData({ ...formData, lectureEndTimestamp_ms: updatedLectureEndTimestamp });
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,6 +197,32 @@ export function CoverageForm({
           value={formData.clipId}
           onChange={handleChange}
           placeholder="Enter clip ID"
+          variant="outlined"
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="Lecture Start Time"
+          type="time"
+          name="startTime"
+          value={dayjs(formData.timestamp_ms).format('HH:mm')}
+          onChange={handleStartTimeChange}
+          placeholder="Enter Start Time"
+          variant="outlined"
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label="Lecture End Time"
+          type="time"
+          name="endTime"
+          value={dayjs(formData.lectureEndTimestamp_ms).format('HH:mm')}
+          onChange={handleEndTimeChange}
+          placeholder="Enter End Time"
           variant="outlined"
         />
       </Grid>
