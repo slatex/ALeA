@@ -3,12 +3,19 @@ export interface Holiday {
   name: string;
 }
 
+interface Course {
+  courseId: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
 export interface SemesterPeriod {
   semesterStart: string;
   semesterEnd: string;
   lectureStart: string;
   lectureEnd: string;
   holidays: Holiday[];
+  courses: Course[];
 }
 
 export const semesterPeriods: Record<string, SemesterPeriod> = {
@@ -27,6 +34,13 @@ export const semesterPeriods: Record<string, SemesterPeriod> = {
       { date: '2025-06-19', name: 'Feast of Corpus Christi' },
       { date: '2025-06-20', name: 'No Lecture' },
     ],
+    courses: [
+      { courseId: 'krmt', dayOfWeek: 2, startTime: '12:15', endTime: '13:45' },
+      { courseId: 'smai', dayOfWeek: 2, startTime: '10:15', endTime: '11:50' },
+      { courseId: 'ai-2', dayOfWeek: 2, startTime: '16:15', endTime: '17:50' },
+      { courseId: 'ai-2', dayOfWeek: 3, startTime: '16:15', endTime: '17:50' },
+      { courseId: 'iwgs-2', dayOfWeek: 4, startTime: '16:15', endTime: '17:50' },
+    ],
   },
   'WS25-26': {
     semesterStart: '2025-10-01',
@@ -37,6 +51,6 @@ export const semesterPeriods: Record<string, SemesterPeriod> = {
       { date: '2025-10-03', name: 'Day of German Unity' },
       { date: '2025-11-01', name: 'All Saints Day' },
     ],
+    courses: [],
   },
 };
-

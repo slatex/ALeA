@@ -94,9 +94,11 @@ export interface LectureEntry {
   };
   lectureEndTimestamp_ms?: number;
 }
+
 export interface CoverageTimeline {
   [courseId: string]: LectureEntry[];
 }
+
 
 export const COURSES_INFO: { [courseId: string]: CourseInfo } = {
   'ai-1': createCourseInfo(

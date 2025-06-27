@@ -43,6 +43,7 @@ function convertSnapToEntry(snap: LectureEntry, index: number): any {
     slideUri: snap.slideUri || '',
     slideNumber: snap.slideNumber,
     autoDetected: snap.autoDetected || undefined,
+    lectureEndTimestamp_ms: snap.lectureEndTimestamp_ms ,
   };
 }
 
@@ -71,6 +72,7 @@ export function CoverageUpdater({
     isQuizScheduled: false,
     slideUri: '',
     slideNumber: undefined as number | undefined,
+    lectureEndTimestamp_ms: Date.now(),
   });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -105,6 +107,7 @@ export function CoverageUpdater({
       isQuizScheduled: false,
       slideUri: '',
       slideNumber: undefined,
+      lectureEndTimestamp_ms: undefined,
     });
     setEditIndex(null);
   };
@@ -118,6 +121,7 @@ export function CoverageUpdater({
       isQuizScheduled: formData.isQuizScheduled,
       slideUri: formData.slideUri,
       slideNumber: formData.slideNumber,
+      lectureEndTimestamp_ms: formData.lectureEndTimestamp_ms,
     };
     setFormData({
       sectionName: '',
@@ -129,6 +133,7 @@ export function CoverageUpdater({
       isQuizScheduled: false,
       slideUri: '',
       slideNumber: undefined,
+      lectureEndTimestamp_ms: Date.now(),
     });
     handleSaveSingle(newItem);
   };
