@@ -16,7 +16,7 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import { getUserInfo } from '@stex-react/api';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { createNewIssue, IssueCategory, IssueType, SelectionContext } from './issueCreator';
 import { getLocaleObject } from './lang/utils';
 
@@ -61,17 +61,39 @@ export function ReportProblemDialog({
     });
   }, []);
 
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (description.length <= 10 || title) return;
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      fetch('/api/generateIssueTitle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description, selectedText, category, context }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.title) setTitle(data.title);
+        })
+        .catch((err) => {
+          console.error('Failed to generate title:', err);
+        });
+    }, 2000); // 2000ms debounce
+  }, [description, selectedText, category, context, title]);
+
   return (
-    <Dialog id="report-a-problem-dialog" onClose={() => setOpen(false)} open={open} sx={{ zIndex: 20000 }}>
+    <Dialog
+      id="report-a-problem-dialog"
+      onClose={() => setOpen(false)}
+      open={open}
+      sx={{ zIndex: 20000 }}
+    >
       <DialogContent>
-        <TextField
-          fullWidth
-          id="bug-title-text"
-          label={t.titleLabel}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          sx={{ marginBottom: '10px' }}
-        />
         <FormControl
           error={categoryError}
           sx={{
@@ -82,9 +104,7 @@ export function ReportProblemDialog({
             width: 'calc(100% - 12px)',
           }}
         >
-          <FormLabel id="category-group-label">
-            {t.issueCategoryPrompt}
-          </FormLabel>
+          <FormLabel id="category-group-label">{t.issueCategoryPrompt}</FormLabel>
           <RadioGroup
             row
             aria-labelledby="category-group-label"
@@ -93,7 +113,7 @@ export function ReportProblemDialog({
             onChange={(e) => {
               const v = e.target.value;
               setCategoryInput(v);
-              if(v === TYPO_CATEGORY_INPUT) setTypeInput(IssueType.ERROR.toString());
+              if (v === TYPO_CATEGORY_INPUT) setTypeInput(IssueType.ERROR.toString());
             }}
           >
             <FormControlLabel
@@ -106,11 +126,7 @@ export function ReportProblemDialog({
               control={<Radio />}
               label={t.display}
             />
-            <FormControlLabel
-              value={TYPO_CATEGORY_INPUT}
-              control={<Radio />}
-              label={t.typo}
-            />
+            <FormControlLabel value={TYPO_CATEGORY_INPUT} control={<Radio />} label={t.typo} />
           </RadioGroup>
         </FormControl>
 
@@ -136,19 +152,17 @@ export function ReportProblemDialog({
               value={IssueType.ERROR.toString()}
               control={<Radio />}
               label={t.errorType}
-              disabled={categoryInput === TYPO_CATEGORY_INPUT }
+              disabled={categoryInput === TYPO_CATEGORY_INPUT}
             />
             <FormControlLabel
               value={IssueType.SUGGESTION.toString()}
               control={<Radio />}
               label={t.suggestionType}
-              disabled={categoryInput === TYPO_CATEGORY_INPUT }
+              disabled={categoryInput === TYPO_CATEGORY_INPUT}
             />
           </RadioGroup>
         </FormControl>
-        <span
-          style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}
-        >
+        <span style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}>
           {t.selectedContent}
         </span>
         <Box
@@ -163,9 +177,7 @@ export function ReportProblemDialog({
         >
           {selectedText}
         </Box>
-        <FormHelperText sx={{ margin: '0 5px 15px 0' }}>
-          *{t.helperText}
-        </FormHelperText>
+        <FormHelperText sx={{ margin: '0 5px 15px 0' }}>*{t.helperText}</FormHelperText>
 
         <TextField
           error={descriptionError}
@@ -189,9 +201,7 @@ export function ReportProblemDialog({
           />
         )}
         <i style={{ display: 'block' }}>
-          {!postAnonymously &&
-            !!userName &&
-            t.nameShared.replace('$1', userName)}
+          {!postAnonymously && !!userName && t.nameShared.replace('$1', userName)}
           {postAnonymously && !!userName && t.anonymousRegret}
         </i>
       </DialogContent>
@@ -227,11 +237,7 @@ export function ReportProblemDialog({
         >
           {t.createIssue}
         </Button>
-        {isCreating ? (
-          <CircularProgress size={20} sx={{ ml: '5px' }} />
-        ) : (
-          <Box width={25}></Box>
-        )}
+        {isCreating ? <CircularProgress size={20} sx={{ ml: '5px' }} /> : <Box width={25}></Box>}
       </DialogActions>
     </Dialog>
   );
