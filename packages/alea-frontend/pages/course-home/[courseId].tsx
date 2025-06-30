@@ -5,12 +5,15 @@ import PersonIcon from '@mui/icons-material/Person';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import QuizIcon from '@mui/icons-material/Quiz';
 import SchoolIcon from '@mui/icons-material/School';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import SearchIcon from '@mui/icons-material/Search';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
   addRemoveMember,
   canAccessResource,
   getCourseInfo,
+  getCoverageTimeline,
   getUserInfo,
   UserInfo,
 } from '@stex-react/api';
@@ -23,6 +26,8 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import {
   Action,
@@ -158,7 +163,36 @@ const CourseHomePage: NextPage = () => {
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
   const studentCount = useStudentCount(courseId, CURRENT_TERM);
-  
+  const [nextLectureDate, setNextLectureDate] = useState<string | null>(null);
+  useEffect(() => {
+    async function fetchNextLecture() {
+      try {
+        const timeline = await getCoverageTimeline();
+        const now = Date.now();
+        const entries = timeline[courseId] || [];
+        const upcoming = entries
+          ?.filter((entry) => entry.timestamp_ms && entry.timestamp_ms > now)
+          ?.sort((a, b) => a.timestamp_ms - b.timestamp_ms);
+        if (upcoming?.length > 0) {
+          const date = new Date(upcoming[0].timestamp_ms);
+          const formatted = date.toLocaleDateString(undefined, {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          setNextLectureDate(formatted);
+        }
+      } catch (error) {
+        console.error('Failed to fetch lecture timeline:', error);
+      }
+    }
+
+    if (courseId) {
+      fetchNextLecture();
+    }
+  }, [courseId]);
+
   useEffect(() => {
     getUserInfo().then((userInfo: UserInfo) => {
       setUserId(userInfo?.userId);
@@ -328,6 +362,135 @@ const CourseHomePage: NextPage = () => {
             </Alert>
           </Box>
         )}
+        <Box
+          sx={{
+            mt: 3,
+            p: 3,
+            borderRadius: '12px',
+            backgroundColor: '#f8f9fa',
+            border: '1px solid #e0e0e0',
+          }}
+        >
+          {nextLectureDate && (
+            <Box
+              sx={{
+                mb: 3,
+                px: 3,
+                py: 1.5,
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #e8f5e8, #f0f9ff)',
+                border: '1px solid #b2dfdb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: { xs: 'center', sm: 'flex-start' },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <CalendarMonthIcon sx={{ color: '#00796b', fontSize: '20px' }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#00695c' }}>
+                  Next Lecture:
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#00796b' }}>
+                  {nextLectureDate}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          {userId && (
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, mb: 2, textAlign: 'center', color: '#1976d2' }}
+              >
+                📅 Personal Calendar
+              </Typography>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 2,
+                  flexWrap: 'wrap',
+                  mb: 2,
+                }}
+              >
+                <Tooltip title="Open your personalized calendar in Google Calendar">
+                  <Button
+                    variant="contained"
+                    startIcon={<CalendarMonthIcon />}
+                    component="a"
+                    href={`https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(
+                      `https://courses.voll-ki.fau.de/api/calendar/create-calendar?userId=${userId}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1,
+                    }}
+                  >
+                    Open Calendar
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Copy calendar link to use in other apps">
+                  <Button
+                    variant="outlined"
+                    startIcon={<ContentCopyIcon />}
+                    onClick={(event) => {
+                      const calendarURL = `https://courses.voll-ki.fau.de/api/calendar/create-calendar?userId=${userId}`;
+                      navigator.clipboard.writeText(calendarURL);
+                      const button = event.currentTarget;
+                      const originalText = button.textContent;
+                      button.innerHTML = '✓ Copied!';
+                      button.style.color = '#4caf50';
+                      button.style.borderColor = '#4caf50';
+
+                      setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.color = '';
+                        button.style.borderColor = '';
+                      }, 2000);
+                    }}
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1,
+                    }}
+                  >
+                    Copy Link
+                  </Button>
+                </Tooltip>
+              </Box>
+              <Box
+                sx={{
+                  p: 1.5,
+                  backgroundColor: '#e3f2fd',
+                  borderRadius: '8px',
+                  border: '1px solid #bbdefb',
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ color: '#1565c0', display: 'block', fontWeight: 600, mb: 0.5 }}
+                >
+                  💡 How to use:
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: '#1976d2', fontSize: '0.8rem', lineHeight: 1.4 }}
+                >
+                  Copy the link and paste it in Google Calendar → "Other calendars" → "From URL" to
+                  sync with your devices.
+                </Typography>
+              </Box>
+            </Box>
+          )}
+        </Box>
         {showSearchBar && (
           <Box
             sx={{
