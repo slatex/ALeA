@@ -418,9 +418,7 @@ const CourseHomePage: NextPage = () => {
                     variant="contained"
                     startIcon={<CalendarMonthIcon />}
                     component="a"
-                    href={`https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(
-                      `https://courses.voll-ki.fau.de/api/calendar/create-calendar?userId=${userId}`
-                    )}`}
+                    href="https://calendar.google.com/calendar/u/0/r"
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{
