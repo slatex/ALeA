@@ -16,7 +16,7 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import { getUserInfo } from '@stex-react/api';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { createNewIssue, IssueCategory, IssueType, SelectionContext } from './issueCreator';
 import { getLocaleObject } from './lang/utils';
 
@@ -52,7 +52,7 @@ export function ReportProblemDialog({
   const typeError = !typeInput?.length;
   const categoryError = !categoryInput?.length;
   const descriptionError = !description?.length;
-  const anyError = typeError || categoryError || descriptionError;
+  const anyError = descriptionError;
 
   useEffect(() => {
     getUserInfo().then((userInfo) => {
@@ -60,31 +60,6 @@ export function ReportProblemDialog({
       setUserName(userInfo.fullName);
     });
   }, []);
-
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (description.length <= 10 || title) return;
-
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      fetch('/api/generateIssueTitle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description, selectedText, category, context }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.title) setTitle(data.title);
-        })
-        .catch((err) => {
-          console.error('Failed to generate title:', err);
-        });
-    }, 2000); // 2000ms debounce
-  }, [description, selectedText, category, context, title]);
 
   return (
     <Dialog
@@ -94,7 +69,7 @@ export function ReportProblemDialog({
       sx={{ zIndex: 20000 }}
     >
       <DialogContent>
-        <FormControl
+        {/* <FormControl
           error={categoryError}
           sx={{
             border: '1px solid #CCC',
@@ -161,7 +136,7 @@ export function ReportProblemDialog({
               disabled={categoryInput === TYPO_CATEGORY_INPUT}
             />
           </RadioGroup>
-        </FormControl>
+        </FormControl> */}
         <span style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}>
           {t.selectedContent}
         </span>
@@ -214,14 +189,36 @@ export function ReportProblemDialog({
           onClick={async () => {
             setIsCreating(true);
             try {
+              let generatedTitle = title;
+              let autoType: IssueType = IssueType.ERROR;
+              let autoCategory: IssueCategory = IssueCategory.CONTENT;
+
+              if (description.length > 10) {
+                const res = await fetch('/api/generate-issue-title', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ description, selectedText, context }),
+                });
+
+                const data = await res.json();
+
+                generatedTitle = data.title || 'Untitled Issue';
+                if (data.type === 'ERROR' || data.type === 'SUGGESTION') {
+                  autoType = data.type as IssueType;
+                }
+                if (data.category === 'CONTENT' || data.category === 'DISPLAY') {
+                  autoCategory = data.category as IssueCategory;
+                }
+              }
+
               const issueLink = await createNewIssue(
-                type,
-                category,
+                autoType,
+                autoCategory,
                 description,
                 selectedText,
                 context,
                 postAnonymously ? '' : userName,
-                title?.trim().length > 0 ? title.trim() : undefined
+                generatedTitle?.trim().length > 0 ? generatedTitle.trim() : undefined
               );
               onCreateIssue(issueLink);
             } catch (e) {
