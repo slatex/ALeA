@@ -244,7 +244,7 @@ const CourseHomePage: NextPage = () => {
     courseInfo;
 
   const locale = router.locale || 'en';
-  const { home, courseHome: tCourseHome, quiz: q } = getLocaleObject(router);
+  const { home, courseHome: tCourseHome, calendarSection: tCal, quiz: q } = getLocaleObject(router);
   const t = home.courseThumb;
 
   const showSearchBar = ['ai-1', 'ai-2', 'iwgs-1', 'iwgs-2'].includes(courseId);
@@ -387,9 +387,7 @@ const CourseHomePage: NextPage = () => {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <CalendarMonthIcon sx={{ color: '#00796b', fontSize: '20px' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#00695c' }}>
-                  Next Lecture:
-                </Typography>
+                <Typography variant="subtitle1">{tCal.nextLecture}:</Typography>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#00796b' }}>
                   {nextLectureDate}
                 </Typography>
@@ -402,7 +400,7 @@ const CourseHomePage: NextPage = () => {
                 variant="h6"
                 sx={{ fontWeight: 600, mb: 2, textAlign: 'center', color: '#1976d2' }}
               >
-                📅 Personal Calendar
+                📅 {tCal.personalCalendar}
               </Typography>
 
               <Box
@@ -478,14 +476,14 @@ const CourseHomePage: NextPage = () => {
                   variant="caption"
                   sx={{ color: '#1565c0', display: 'block', fontWeight: 600, mb: 0.5 }}
                 >
-                  💡 How to use:
+                  💡 {tCal.howToUse}:
                 </Typography>
+
                 <Typography
                   variant="body2"
                   sx={{ color: '#1976d2', fontSize: '0.8rem', lineHeight: 1.4 }}
                 >
-                  Copy the link and paste it in Google Calendar → "Other calendars" → "From URL" to
-                  sync with your devices.
+                  {tCal.howToUseHint}
                 </Typography>
               </Box>
             </Box>

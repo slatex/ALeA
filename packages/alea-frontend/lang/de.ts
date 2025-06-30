@@ -449,4 +449,10 @@ export const de = {
     loadingPreviewOfChanges: 'Laden der Vorschau der Änderungen...',
     ApplyRecorrection: 'Rekorrektur anwenden',
   },
+  calendarSection: {
+    nextLecture: 'Nächste Vorlesung',
+    personalCalendar: 'Persönlicher Kalender',
+    howToUse: 'So verwendest du es',
+    howToUseHint: `Kopiere den Link und füge ihn in Google Kalender → "Weitere Kalender" → "Per URL hinzufügen" ein, um ihn mit deinen Geräten zu synchronisieren.`,
+  },
 };

@@ -482,4 +482,10 @@ export const en = {
     loadingPreviewOfChanges: 'Loading preview of changes...',
     ApplyRecorrection: 'Apply Recorrection',
   },
+  calendarSection: {
+    nextLecture: 'Next Lecture',
+    personalCalendar: 'Personal Calendar',
+    howToUse: 'How to use',
+    howToUseHint: `Copy the link and paste it in Google Calendar → "Other calendars" → "From URL" to sync with your devices.`,
+  },
 };
