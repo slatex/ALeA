@@ -6,21 +6,15 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  FormControl,
   FormControlLabel,
   FormHelperText,
-  FormLabel,
   TextField,
 } from '@mui/material';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
 import { getUserInfo } from '@stex-react/api';
 import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { createNewIssue, IssueCategory, IssueType, SelectionContext } from './issueCreator';
 import { getLocaleObject } from './lang/utils';
-
-const TYPO_CATEGORY_INPUT = 'TYPO';
 
 export function ReportProblemDialog({
   open,
@@ -36,21 +30,11 @@ export function ReportProblemDialog({
   onCreateIssue: (issueUrl: string) => void;
 }) {
   const t = getLocaleObject(useRouter());
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [typeInput, setTypeInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [userName, setUserName] = useState('');
   const [postAnonymously, setPostAnonymously] = useState(false);
 
-  const category: IssueCategory =
-    categoryInput === TYPO_CATEGORY_INPUT
-      ? IssueCategory.CONTENT
-      : IssueCategory[categoryInput as keyof typeof IssueCategory];
-  const type: IssueType = IssueType[typeInput as keyof typeof IssueType];
-  const typeError = !typeInput?.length;
-  const categoryError = !categoryInput?.length;
   const descriptionError = !description?.length;
   const anyError = descriptionError;
 
@@ -69,74 +53,6 @@ export function ReportProblemDialog({
       sx={{ zIndex: 20000 }}
     >
       <DialogContent>
-        {/* <FormControl
-          error={categoryError}
-          sx={{
-            border: '1px solid #CCC',
-            borderRadius: '5px',
-            p: '5px',
-            my: '5px',
-            width: 'calc(100% - 12px)',
-          }}
-        >
-          <FormLabel id="category-group-label">{t.issueCategoryPrompt}</FormLabel>
-          <RadioGroup
-            row
-            aria-labelledby="category-group-label"
-            name="category-group"
-            value={categoryInput}
-            onChange={(e) => {
-              const v = e.target.value;
-              setCategoryInput(v);
-              if (v === TYPO_CATEGORY_INPUT) setTypeInput(IssueType.ERROR.toString());
-            }}
-          >
-            <FormControlLabel
-              value={IssueCategory.CONTENT.toString()}
-              control={<Radio />}
-              label={t.information}
-            />
-            <FormControlLabel
-              value={IssueCategory.DISPLAY.toString()}
-              control={<Radio />}
-              label={t.display}
-            />
-            <FormControlLabel value={TYPO_CATEGORY_INPUT} control={<Radio />} label={t.typo} />
-          </RadioGroup>
-        </FormControl>
-
-        <FormControl
-          error={typeError}
-          sx={{
-            border: '1px solid #CCC',
-            borderRadius: '5px',
-            p: '5px',
-            my: '5px',
-            width: 'calc(100% - 12px)',
-          }}
-        >
-          <FormLabel id="category-group-label">{t.issueType}</FormLabel>
-          <RadioGroup
-            row
-            aria-labelledby="type-group-label"
-            name="type-group"
-            value={typeInput}
-            onChange={(e) => setTypeInput(e.target.value)}
-          >
-            <FormControlLabel
-              value={IssueType.ERROR.toString()}
-              control={<Radio />}
-              label={t.errorType}
-              disabled={categoryInput === TYPO_CATEGORY_INPUT}
-            />
-            <FormControlLabel
-              value={IssueType.SUGGESTION.toString()}
-              control={<Radio />}
-              label={t.suggestionType}
-              disabled={categoryInput === TYPO_CATEGORY_INPUT}
-            />
-          </RadioGroup>
-        </FormControl> */}
         <span style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}>
           {t.selectedContent}
         </span>
@@ -189,7 +105,7 @@ export function ReportProblemDialog({
           onClick={async () => {
             setIsCreating(true);
             try {
-              let generatedTitle = title;
+              let generatedTitle = undefined;
               let autoType: IssueType = IssueType.ERROR;
               let autoCategory: IssueCategory = IssueCategory.CONTENT;
 
