@@ -43,7 +43,7 @@ import {
   ComponentType,
   RESOURCE_TYPE_MAP,
   ResourceIdComponent,
-  ResourceName
+  ResourceName,
 } from '@stex-react/utils';
 import { NextPage } from 'next';
 import Link from 'next/link';
@@ -57,7 +57,7 @@ import {
   createSemesterAclsForCourse,
   createStaffResourceActions,
   createStudentResourceActions,
-} from '../utils/semester-helper';
+} from 'packages/utils/src/lib/semester-helper';
 
 const SysAdmin: NextPage = () => {
   const router = useRouter();
