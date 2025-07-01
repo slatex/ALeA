@@ -55,7 +55,7 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-nano',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
       max_tokens: 150,
@@ -68,12 +68,10 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
 
     const classification: IssueClassification = JSON.parse(content);
     
-    // Validate the response structure
     if (!classification.title || !classification.category || !classification.type) {
       throw new Error('Invalid classification response');
     }
 
-    // Ensure valid enum values
     if (!['CONTENT', 'DISPLAY'].includes(classification.category)) {
       classification.category = 'CONTENT';
     }
@@ -81,7 +79,6 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
       classification.type = 'ERROR';
     }
 
-    // Clean up title
     classification.title = classification.title.replace(/^["']|["']$/g, '').substring(0, 60);
 
     res.status(200).json(classification);
