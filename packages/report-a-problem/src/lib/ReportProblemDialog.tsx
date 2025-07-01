@@ -1,3 +1,4 @@
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {
   Box,
   Button,
@@ -12,11 +13,11 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { getSourceUrl, getUserInfo } from '@stex-react/api';
+import { getUserInfo } from '@stex-react/api';
+import { handleViewSource } from '@stex-react/stex-react-renderer';
 import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { createNewIssue, IssueCategory, IssueType, SelectionContext } from './issueCreator';
+import { createNewIssue, IssueCategory, SelectionContext } from './issueCreator';
 import { getLocaleObject } from './lang/utils';
 
 export function ReportProblemDialog({
@@ -48,7 +49,6 @@ export function ReportProblemDialog({
     });
   }, []);
 
-
   return (
     <Dialog
       id="report-a-problem-dialog"
@@ -64,9 +64,7 @@ export function ReportProblemDialog({
           {t.selectedContent}
         </span>
         <IconButton
-          onClick={() => getSourceUrl(context[0].fragmentUri).then((sourceLink) => {
-            if (sourceLink) window.open(sourceLink, '_blank');
-          })}
+          onClick={() => handleViewSource(context[0].fragmentUri)}
           sx={{ float: 'right' }}
         >
           <Tooltip title="view source">
