@@ -48,11 +48,6 @@ export function ReportProblemDialog({
     });
   }, []);
 
-  const handleViewSource = (uri: string) => {
-    getSourceUrl(uri).then((sourceLink) => {
-      if (sourceLink) window.open(sourceLink, '_blank');
-    });
-  };
 
   return (
     <Dialog
@@ -69,7 +64,9 @@ export function ReportProblemDialog({
           {t.selectedContent}
         </span>
         <IconButton
-          onClick={() => handleViewSource(context[0].fragmentUri)}
+          onClick={() => getSourceUrl(context[0].fragmentUri).then((sourceLink) => {
+            if (sourceLink) window.open(sourceLink, '_blank');
+          })}
           sx={{ float: 'right' }}
         >
           <Tooltip title="view source">
