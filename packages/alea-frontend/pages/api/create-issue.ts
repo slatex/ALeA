@@ -48,5 +48,5 @@ export default async function handler(req, res) {
   const issue_url = response.data['web_url'] || response.data['html_url'];
   res.status(200).json({ issue_url });
   await sendAlert(`A user-reported issue was created at ${issue_url}`);
-  await sendReportNotifications(userId, issue_url, body.type);
+  // await sendReportNotifications(userId, issue_url, body.type);
 }

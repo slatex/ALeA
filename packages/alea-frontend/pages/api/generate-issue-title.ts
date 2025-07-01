@@ -12,8 +12,6 @@ const openai = new OpenAI({ apiKey });
 export interface IssueClassification {
   title: string;
   category: 'CONTENT' | 'DISPLAY';
-  type: 'ERROR' | 'SUGGESTION';
-  isTypo: boolean;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -28,8 +26,6 @@ You are an assistant that analyzes user reports and generates issue classificati
 Your task is to:
 1. Generate a concise issue title
 2. Classify the issue category (CONTENT or DISPLAY)
-3. Classify the issue type (ERROR or SUGGESTION)
-4. Determine if it's a typo/spelling error
 
 Context:
 - Selected Text: ${selectedText}
@@ -39,16 +35,11 @@ Context:
 Classification Guidelines:
 - CONTENT: Issues related to information accuracy, missing content, typos, spelling errors, factual problems
 - DISPLAY: Issues related to visual presentation, formatting, layout, rendering problems
-- ERROR: Something is wrong/broken that needs to be fixed
-- SUGGESTION: An improvement or enhancement recommendation
-- isTypo: true if the issue is specifically about spelling, grammar, or typographical errors
 
 Respond with a valid JSON object in this exact format:
 {
   "title": "Brief descriptive title (max 60 characters)",
   "category": "CONTENT" or "DISPLAY",
-  "type": "ERROR" or "SUGGESTION", 
-  "isTypo": true or false
 }
 
 Keep the title neutral, readable by educators and developers, and don't repeat the user's words verbatim.`;
@@ -68,15 +59,12 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
 
     const classification: IssueClassification = JSON.parse(content);
     
-    if (!classification.title || !classification.category || !classification.type) {
+    if (!classification.title || !classification.category) {
       throw new Error('Invalid classification response');
     }
 
     if (!['CONTENT', 'DISPLAY'].includes(classification.category)) {
       classification.category = 'CONTENT';
-    }
-    if (!['ERROR', 'SUGGESTION'].includes(classification.type)) {
-      classification.type = 'ERROR';
     }
 
     classification.title = classification.title.replace(/^["']|["']$/g, '').substring(0, 60);
@@ -86,9 +74,7 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
     console.error('Issue classification error:', err);
     res.status(500).json({ 
       title: 'Issue Classification Failed',
-      category: 'CONTENT',
-      type: 'ERROR',
-      isTypo: false
+      category: 'CONTENT'
     });
   }
 }

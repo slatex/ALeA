@@ -126,7 +126,6 @@ export function ReportProblemDialog({
             setIsCreating(true);
             try {
               let generatedTitle = undefined;
-              let issueType: IssueType = IssueType.ERROR;
               let issueCategory: IssueCategory = IssueCategory.CONTENT;
 
               if (description.length > 10) {
@@ -139,16 +138,12 @@ export function ReportProblemDialog({
                 const data = await res.json();
 
                 generatedTitle = data.title || 'Untitled Issue';
-                if (data.type === 'ERROR' || data.type === 'SUGGESTION') {
-                  issueType = data.type as IssueType;
-                }
                 if (data.category === 'CONTENT' || data.category === 'DISPLAY') {
                   issueCategory = data.category as IssueCategory;
                 }
               }
 
               const issueLink = await createNewIssue(
-                issueType,
                 issueCategory,
                 description,
                 selectedText,

@@ -43,7 +43,6 @@ async function createSectionHierarchy(context: SelectionContext[]) {
 }
 
 async function createIssueBody(
-  type: IssueType,
   desc: string,
   selectedText: string,
   userName: string,
@@ -52,7 +51,7 @@ async function createIssueBody(
   const sectionHierarchy = await createSectionHierarchy(context);
   const user = userName || 'a user';
 
-  return `A content ${type.toString()} was logged by "${user}" at the following url:
+  return `An issue was logged by "${user}" at the following url:
 
 ${window.location.href}
 
@@ -79,7 +78,6 @@ function getNewIssueUrl(category: IssueCategory, projectId: string, context: Sel
 }
 
 async function createIssueData(
-  type: IssueType,
   category: IssueCategory,
   desc: string,
   selectedText: string,
@@ -88,16 +86,15 @@ async function createIssueData(
   title?: string
 ) {
   const { filepath } = extractProjectAndFilepath(context[0]?.source);
-  const body = await createIssueBody(type, desc, selectedText, userName, context);
+  const body = await createIssueBody( desc, selectedText, userName, context);
   return {
-    title: title || `User reported ${type.toString()} ${filepath}`,
+    title: title || `User reported issue in ${filepath}`,
     ...(isGitlabIssue(category, context)
       ? { description: body }
       : { body, labels: ['user-reported'] }),
   };
 }
 export async function createNewIssue(
-  type: IssueType,
   category: IssueCategory,
   desc: string,
   selectedText: string,
@@ -109,7 +106,6 @@ export async function createNewIssue(
   const { project } = extractProjectAndFilepath(withSourceContext[0]?.source);
   const projectId = project || 'sTeX/meta-inf';
   const data = await createIssueData(
-    type,
     category,
     desc,
     selectedText,
@@ -123,7 +119,6 @@ export async function createNewIssue(
       '/api/create-issue',
       {
         data,
-        type,
         createNewIssueUrl,
         category: category.toString(),
       },
