@@ -52,6 +52,9 @@ export function ReportProblemDialog({
       open={open}
       sx={{ zIndex: 20000 }}
     >
+      <Box sx={{ borderBottom: '1px solid #eee', justifyContent: 'center', display: 'flex'  }}>
+        <h2>{t.reportProblem}</h2>
+      </Box>
       <DialogContent>
         <span style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}>
           {t.selectedContent}
@@ -106,8 +109,8 @@ export function ReportProblemDialog({
             setIsCreating(true);
             try {
               let generatedTitle = undefined;
-              let autoType: IssueType = IssueType.ERROR;
-              let autoCategory: IssueCategory = IssueCategory.CONTENT;
+              let issueType: IssueType = IssueType.ERROR;
+              let issueCategory: IssueCategory = IssueCategory.CONTENT;
 
               if (description.length > 10) {
                 const res = await fetch('/api/generate-issue-title', {
@@ -120,16 +123,16 @@ export function ReportProblemDialog({
 
                 generatedTitle = data.title || 'Untitled Issue';
                 if (data.type === 'ERROR' || data.type === 'SUGGESTION') {
-                  autoType = data.type as IssueType;
+                  issueType = data.type as IssueType;
                 }
                 if (data.category === 'CONTENT' || data.category === 'DISPLAY') {
-                  autoCategory = data.category as IssueCategory;
+                  issueCategory = data.category as IssueCategory;
                 }
               }
 
               const issueLink = await createNewIssue(
-                autoType,
-                autoCategory,
+                issueType,
+                issueCategory,
                 description,
                 selectedText,
                 context,
