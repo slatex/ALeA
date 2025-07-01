@@ -60,17 +60,14 @@ export function ReportProblemDialog({
         <h2>{t.reportProblem}</h2>
       </Box>
       <DialogContent>
-        <span style={{ display: 'block', color: '#00000099', margin: '5px 0 0' }}>
-          {t.selectedContent}
-        </span>
-        <Tooltip title="view source">
-          <IconButton
-            onClick={() => handleViewSource(context[0].fragmentUri)}
-            sx={{ float: 'right' }}
-          >
-            <OpenInNewIcon />
-          </IconButton>
-        </Tooltip>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#00000099' }}>{t.selectedContent}</span>
+          <Tooltip title="view source">
+            <IconButton onClick={() => handleViewSource(context[0].fragmentUri)}>
+              <OpenInNewIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
         <Box
           sx={{
