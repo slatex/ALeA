@@ -32,6 +32,10 @@ Context:
 - Description: ${description}
 - Fragment context: ${JSON.stringify(context)}
 
+The classification is important because it determines where the issue will be reported:
+- CONTENT → GitLab
+- DISPLAY → GitHub
+
 Classification Guidelines:
 - CONTENT: Issues related to information accuracy, missing content, typos, spelling errors, factual problems
 - DISPLAY: Issues related to visual presentation, formatting, layout, rendering problems
