@@ -8,7 +8,6 @@ import SchoolIcon from '@mui/icons-material/School';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import SearchIcon from '@mui/icons-material/Search';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
   addRemoveMember,
   canAccessResource,
@@ -17,7 +16,6 @@ import {
   getUserInfo,
   UserInfo,
 } from '@stex-react/api';
-
 import {
   Alert,
   Box,
@@ -26,7 +24,6 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import {
@@ -37,6 +34,7 @@ import {
   INSTRUCTOR_RESOURCE_AND_ACTION,
   isFauId,
   ResourceName,
+  semesterPeriods,
 } from '@stex-react/utils';
 import { NextPage } from 'next';
 import Image from 'next/image';
@@ -48,6 +46,7 @@ import { getLocaleObject } from '../../lang/utils';
 import MainLayout from '../../layouts/MainLayout';
 import { FTMLDocument } from '@kwarc/ftml-react';
 import { useStudentCount } from '../../hooks/useStudentCount';
+import { PersonalCalendarSection } from 'packages/alea-frontend/components/PersonalCalendar';
 
 export function getCourseEnrollmentAcl(courseId: string, instanceId: string) {
   return `${courseId}-${instanceId}-enrollments`;
@@ -153,6 +152,20 @@ export function CourseHeader({
   );
 }
 
+function getNextDateForWeekday(weekday: number): string {
+  const today = new Date();
+  const result = new Date();
+  const current = today.getDay();
+  const offset = (weekday - current + 7) % 7 || 7;
+  result.setDate(today.getDate() + offset);
+  return result.toLocaleDateString(undefined, {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 const CourseHomePage: NextPage = () => {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,35 +176,48 @@ const CourseHomePage: NextPage = () => {
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
   const studentCount = useStudentCount(courseId, CURRENT_TERM);
-  const [nextLectureDate, setNextLectureDate] = useState<string | null>(null);
+  const [nextLectureDatesByDay, setNextLectureDatesByDay] = useState<{ [day: number]: string }>({});
+  const courseSchedule =
+    semesterPeriods[CURRENT_TERM]?.courses.filter((c) => c.courseId === courseId) || [];
+
   useEffect(() => {
-    async function fetchNextLecture() {
+    async function fetchNextLectureDates() {
       try {
         const timeline = await getCoverageTimeline();
         const now = Date.now();
-        const entries = timeline[courseId] || [];
-        const upcoming = entries
-          ?.filter((entry) => entry.timestamp_ms && entry.timestamp_ms > now)
-          ?.sort((a, b) => a.timestamp_ms - b.timestamp_ms);
-        if (upcoming?.length > 0) {
-          const date = new Date(upcoming[0].timestamp_ms);
-          const formatted = date.toLocaleDateString(undefined, {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          });
-          setNextLectureDate(formatted);
+        const entries = (timeline[courseId] || [])
+          .filter((e) => e.timestamp_ms && e.timestamp_ms > now)
+          .sort((a, b) => a.timestamp_ms - b.timestamp_ms);
+
+        const map: { [day: number]: string } = {};
+
+        for (const e of entries) {
+          const d = new Date(e.timestamp_ms);
+          const dow = d.getDay();
+          if (!map[dow]) {
+            map[dow] = d.toLocaleDateString(undefined, {
+              weekday: 'short',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            });
+          }
+          if (Object.keys(map).length === courseSchedule.length) break;
         }
+        courseSchedule.forEach((entry) => {
+          if (!map[entry.dayOfWeek]) {
+            map[entry.dayOfWeek] = getNextDateForWeekday(entry.dayOfWeek);
+          }
+        });
+
+        setNextLectureDatesByDay(map);
       } catch (error) {
         console.error('Failed to fetch lecture timeline:', error);
       }
     }
 
-    if (courseId) {
-      fetchNextLecture();
-    }
-  }, [courseId]);
+    if (courseId) fetchNextLectureDates();
+  }, [courseId, courseSchedule.length]);
 
   useEffect(() => {
     getUserInfo().then((userInfo: UserInfo) => {
@@ -371,121 +397,83 @@ const CourseHomePage: NextPage = () => {
             border: '1px solid #e0e0e0',
           }}
         >
-          {nextLectureDate && (
-            <Box
-              sx={{
-                mb: 3,
-                px: 3,
-                py: 1.5,
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, #e8f5e8, #f0f9ff)',
-                border: '1px solid #b2dfdb',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: { xs: 'center', sm: 'flex-start' },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <CalendarMonthIcon sx={{ color: '#00796b', fontSize: '20px' }} />
-                <Typography variant="subtitle1">{tCal.nextLecture}:</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#00796b' }}>
-                  {nextLectureDate}
-                </Typography>
-              </Box>
-            </Box>
-          )}
-          {userId && (
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 600, mb: 2, textAlign: 'center', color: '#1976d2' }}
-              >
-                📅 {tCal.personalCalendar}
-              </Typography>
-
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5,
+            }}
+          >
+            {courseSchedule.length > 0 && (
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: 2,
-                  flexWrap: 'wrap',
-                  mb: 2,
-                }}
-              >
-                <Tooltip title="Open your personalized calendar in Google Calendar">
-                  <Button
-                    variant="contained"
-                    startIcon={<CalendarMonthIcon />}
-                    component="a"
-                    href="https://calendar.google.com/calendar/u/0/r"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      px: 3,
-                      py: 1,
-                    }}
-                  >
-                    Open Calendar
-                  </Button>
-                </Tooltip>
-
-                <Tooltip title="Copy calendar link to use in other apps">
-                  <Button
-                    variant="outlined"
-                    startIcon={<ContentCopyIcon />}
-                    onClick={(event) => {
-                      const calendarURL = `https://courses.voll-ki.fau.de/api/calendar/create-calendar?userId=${userId}`;
-                      navigator.clipboard.writeText(calendarURL);
-                      const button = event.currentTarget;
-                      const originalText = button.textContent;
-                      button.innerHTML = '✓ Copied!';
-                      button.style.color = '#4caf50';
-                      button.style.borderColor = '#4caf50';
-
-                      setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.style.color = '';
-                        button.style.borderColor = '';
-                      }, 2000);
-                    }}
-                    sx={{
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      px: 3,
-                      py: 1,
-                    }}
-                  >
-                    Copy Link
-                  </Button>
-                </Tooltip>
-              </Box>
-              <Box
-                sx={{
-                  p: 1.5,
-                  backgroundColor: '#e3f2fd',
+                  px: 2,
+                  py: 1.5,
                   borderRadius: '8px',
-                  border: '1px solid #bbdefb',
+                  background: 'linear-gradient(135deg, #e8f5e8, #f0f9ff)',
+                  border: '1px solid #b2dfdb',
                 }}
               >
-                <Typography
-                  variant="caption"
-                  sx={{ color: '#1565c0', display: 'block', fontWeight: 600, mb: 0.5 }}
-                >
-                  💡 {tCal.howToUse}:
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  sx={{ color: '#1976d2', fontSize: '0.8rem', lineHeight: 1.4 }}
-                >
-                  {tCal.howToUseHint}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                  <CalendarMonthIcon sx={{ color: '#00796b', fontSize: '20px' }} />
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: '#00796b', fontSize: '1rem' }}
+                  >
+                    {tCal.schedule}
+                  </Typography>
+                </Box>
+                {courseSchedule.map((entry, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      mb: 1,
+                      p: 1,
+                      borderRadius: '6px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e0f2f1',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, color: '#004d40', minWidth: 'fit-content' }}
+                      >
+                        {nextLectureDatesByDay[entry.dayOfWeek] ??
+                          getNextDateForWeekday(entry.dayOfWeek)}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#00695c', whiteSpace: 'nowrap' }}>
+                        🕒 Time:{entry.startTime} – {entry.endTime}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#00695c' }}>
+                        📍Venue:{' '}
+                        {entry.venueLink ? (
+                          <a
+                            href={entry.venueLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ textDecoration: 'underline', color: '#004d40' }}
+                          >
+                            {entry.venue}
+                          </a>
+                        ) : (
+                          entry.venue
+                        )}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
               </Box>
-            </Box>
-          )}
+            )}
+
+            {userId && (
+              <PersonalCalendarSection
+                userId={userId}
+                hintGoogle={tCal.howToUseHintGoogle}
+                hintApple={tCal.howToUseHintApple}
+              />
+            )}
+          </Box>
         </Box>
         {showSearchBar && (
           <Box

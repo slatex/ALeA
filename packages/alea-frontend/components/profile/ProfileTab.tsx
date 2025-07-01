@@ -20,6 +20,7 @@ import Link from 'next/link';
 
 import { useState } from 'react';
 import { EditProfileDialog } from './EditProfileDialog';
+import { PersonalCalendarSection } from '../PersonalCalendar';
 
 function CalendarInstruction({ openCalendarDialog, setOpenCalendarDialog, t }) {
   return (
@@ -108,6 +109,15 @@ export const ProfileTab = ({
                     </Typography>
                   </Box>
                 ))}
+                {userInfo?.userId && (
+                  <Box sx={{ mt: 2 }}>
+                    <PersonalCalendarSection
+                      userId={userInfo.userId}
+                      hintGoogle={t.calendar.howToUseHintGoogle}
+                      hintApple={t.calendar.howToUseHintApple}
+                    />
+                  </Box>
+                )}
               </Stack>
             ) : (
               <Typography sx={{ color: 'text.secondary' }}>Loading...</Typography>

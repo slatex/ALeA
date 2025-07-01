@@ -450,9 +450,10 @@ export const de = {
     ApplyRecorrection: 'Rekorrektur anwenden',
   },
   calendarSection: {
-    nextLecture: 'Nächste Vorlesung',
+    schedule: 'Stundenplan',
     personalCalendar: 'Persönlicher Kalender',
     howToUse: 'So verwendest du es',
-    howToUseHint: `Kopiere den Link und füge ihn in Google Kalender → "Weitere Kalender" → "Per URL hinzufügen" ein, um ihn mit deinen Geräten zu synchronisieren.`,
+    howToUseHintGoogle: `Öffne Google Kalender → klicke auf "+" neben "Weitere Kalender" → wähle "Aus URL" → füge den Link ein.`,
+    howToUseHintApple: `Öffne Apple Kalender → Datei → Neues Kalenderabonnement → füge den Link ein → klicke auf OK.`,
   },
 };

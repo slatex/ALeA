@@ -467,7 +467,7 @@ export const en = {
     prepareUpcomingQuiz: 'Prepare Upcoming Quiz',
     latestHomework: 'Latest Homework',
     noHomeworkAvailable: 'No homework available',
-    progress: 'Progress'
+    progress: 'Progress',
   },
   recorrection: {
     quizRecorrection: 'Quiz Recorrection',
@@ -483,9 +483,10 @@ export const en = {
     ApplyRecorrection: 'Apply Recorrection',
   },
   calendarSection: {
-    nextLecture: 'Next Lecture',
+    schedule: 'Schedule',
     personalCalendar: 'Personal Calendar',
     howToUse: 'How to use',
-    howToUseHint: `Copy the link and paste it in Google Calendar → "Other calendars" → "From URL" to sync with your devices.`,
+    howToUseHintGoogle: `Open Google Calendar → click "+" next to "Other calendars" → choose "From URL" → paste the link.`,
+    howToUseHintApple: `Open Apple Calendar → File → New Calendar Subscription → paste the link → press OK.`,
   },
 };
