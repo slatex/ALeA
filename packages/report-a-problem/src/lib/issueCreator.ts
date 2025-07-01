@@ -88,7 +88,6 @@ async function createIssueData(
   title?: string
 ) {
   const { filepath } = extractProjectAndFilepath(context[0]?.source);
-  console.log('Type:', type);
   const body = await createIssueBody(type, desc, selectedText, userName, context);
   return {
     title: title || `User reported ${type.toString()} ${filepath}`,
@@ -109,7 +108,6 @@ export async function createNewIssue(
   const withSourceContext = await addSources(context);
   const { project } = extractProjectAndFilepath(withSourceContext[0]?.source);
   const projectId = project || 'sTeX/meta-inf';
-  console.log('Title:', title);
   const data = await createIssueData(
     type,
     category,
