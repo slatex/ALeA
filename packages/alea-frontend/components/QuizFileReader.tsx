@@ -42,12 +42,10 @@ export function QuizFileReader({
   setCss,
   setTitle,
   setProblems,
-  setErrorMessage,
 }: {
   setTitle: (title: string) => void;
   setProblems: (problems: Record<string, FTMLProblemWithSolution>) => void;
   setCss: (css: FTML.CSS[]) => void;
-  setErrorMessage?: (msg: string | undefined) => void;
 }) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -61,19 +59,14 @@ export function QuizFileReader({
         console.log(parsedJson);
         // Check if the parsed content is a valid JSON object before updating the state
         if (typeof parsedJson === 'object' && parsedJson !== null) {
-          if (!parsedJson.css || parsedJson.css.length === 0) {
-            setErrorMessage?.('CSS content is missing in uploaded file.');
-            return;
-          }
           setProblems(getProblemsFromQuiz(parsedJson));
           setTitle(parsedJson.title);
           setCss(parsedJson.css);
-          setErrorMessage?.(undefined); // Clear message if everything is okay
         } else {
           alert('Invalid JSON file.');
         }
       } catch (error) {
-        setErrorMessage?.('Error parsing JSON: ' + (error as Error).message);
+        alert('Error parsing JSON: ' + error);
       }
     };
     reader.readAsText(file);

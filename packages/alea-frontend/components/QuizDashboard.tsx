@@ -74,7 +74,8 @@ function getFormErrorReason(
   feedbackReleaseTs: number,
   manuallySetPhase: string,
   problems: Record<string, FTMLProblemWithSolution>,
-  title: string
+  title: string,
+  css : FTML.CSS[]
 ) {
   const phaseTimes = [quizStartTs, quizEndTs, feedbackReleaseTs].filter((ts) => ts !== 0);
   for (let i = 0; i < phaseTimes.length - 1; i++) {
@@ -82,6 +83,7 @@ function getFormErrorReason(
   }
   if (!problems || Object.keys(problems).length === 0) return 'No problems found.';
   if (title.length === 0) return 'No title set.';
+  if(css.length === 0) return 'CSS content is missing';
   return undefined;
 }
 
@@ -144,14 +146,15 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
     feedbackReleaseTs,
     manuallySetPhase,
     problems,
-    title
+    title,
+    css
   );
 
   const [recorrectionDialogOpen, setRecorrectionDialogOpen] = useState(false);
-  const [uploadErrorMessage, setUploadErrorMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function fetchQuizzes() {
+      console.log("css",css.length);
       const allQuizzes: QuizWithStatus[] = await getAllQuizzes(courseId, courseTerm);
       allQuizzes?.sort((a, b) => b.quizStartTs - a.quizStartTs);
       for (const q of allQuizzes ?? []) {
@@ -341,7 +344,6 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
           setCss={setCss}
           setTitle={setTitle}
           setProblems={setProblems}
-          setErrorMessage={setUploadErrorMessage}
         />
       )}
       <br />
@@ -353,18 +355,16 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
           {formErrorReason}
         </Typography>
       )}
-
-      {uploadErrorMessage && (
+      
+      {!css?.length && Object.keys(problems).length > 0 && (
         <Typography sx={{ color: 'red' }} fontWeight="bold">
-          {uploadErrorMessage}
+          CSS content is missing. Please try refreshing and re-uploading the quiz file.
         </Typography>
       )}
-
-      <br />
       <Box display="flex" gap={2} alignItems="center" mt={2} mb={2}>
         {accessType == 'MUTATE' && (
           <Button
-            disabled={!!formErrorReason || isUpdating || !!uploadErrorMessage}
+            disabled={!!formErrorReason || isUpdating}
             variant="contained"
             startIcon={<UpdateIcon />}
             onClick={async (e) => {
