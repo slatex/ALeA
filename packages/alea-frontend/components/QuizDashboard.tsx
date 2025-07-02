@@ -135,7 +135,6 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
   const [accessType, setAccessType] = useState<'PREVIEW_ONLY' | 'MUTATE'>();
   const [isUpdating, setIsUpdating] = useState(false);
   const [canAccess, setCanAccess] = useState(false);
-  const [courses, setCourses] = useState<{ [id: string]: CourseInfo }>({});
   const isNew = isNewQuiz(selectedQuizId);
 
   const selectedQuiz = quizzes.find((quiz) => quiz.id === selectedQuizId);
@@ -185,6 +184,7 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
       setManuallySetPhase(Phase.UNSET);
       setTitle('');
       setProblems({});
+      setCss([]);
       setCourseTerm(CURRENT_TERM);
       return;
     }
@@ -197,6 +197,7 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
     setManuallySetPhase(selected.manuallySetPhase);
     setTitle(selected.title);
     setProblems(selected.problems);
+    setCss(selected.css || []);
     setCourseTerm(selected.courseTerm);
   }, [selectedQuizId, quizzes]);
 
@@ -204,9 +205,6 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
     setQuizEndTs((prev) => Math.max(prev, quizStartTs));
     setFeedbackReleaseTs((prev) => Math.max(prev, quizStartTs, quizEndTs));
   }, [quizStartTs, quizEndTs]);
-  useEffect(() => {
-    getCourseInfo().then(setCourses);
-  }, []);
 
   useEffect(() => {
     async function checkHasAccessAndGetTypeOfAccess() {
