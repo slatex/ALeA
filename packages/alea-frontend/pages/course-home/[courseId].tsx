@@ -153,17 +153,9 @@ export function CourseHeader({
 }
 
 function getNextDateForWeekday(weekday: number): string {
-  const today = new Date();
-  const result = new Date();
-  const current = today.getDay();
-  const offset = (weekday - current + 7) % 7 || 7;
-  result.setDate(today.getDate() + offset);
-  return result.toLocaleDateString(undefined, {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(
+    new Date(Date.now() + ((weekday - new Date().getDay() + 7) % 7) * 86400000)
+  );
 }
 
 const CourseHomePage: NextPage = () => {
@@ -177,8 +169,29 @@ const CourseHomePage: NextPage = () => {
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
   const studentCount = useStudentCount(courseId, CURRENT_TERM);
   const [nextLectureDatesByDay, setNextLectureDatesByDay] = useState<{ [day: number]: string }>({});
+  const [nextLectureDateFormatted, setNextLectureDateFormatted] = useState<string | null>(null);
   const courseSchedule =
     semesterPeriods[CURRENT_TERM]?.courses.filter((c) => c.courseId === courseId) || [];
+  const now = new Date();
+
+  const getLectureDateTime = (dayOfWeek: number, timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date();
+    const dayOffset = (dayOfWeek - date.getDay() + 7) % 7;
+    date.setDate(date.getDate() + dayOffset);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
+
+  const upcomingLectures = courseSchedule
+    .map((entry) => ({
+      ...entry,
+      dateTime: getLectureDateTime(entry.dayOfWeek, entry.startTime),
+    }))
+    .filter((entry) => entry.dateTime.getTime() > now.getTime())
+    .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
+
+  const nextLectureDay = upcomingLectures[0]?.dayOfWeek;
 
   useEffect(() => {
     async function fetchNextLectureDates() {
@@ -190,16 +203,12 @@ const CourseHomePage: NextPage = () => {
           .sort((a, b) => a.timestamp_ms - b.timestamp_ms);
 
         const map: { [day: number]: string } = {};
-
         for (const e of entries) {
           const d = new Date(e.timestamp_ms);
           const dow = d.getDay();
           if (!map[dow]) {
             map[dow] = d.toLocaleDateString(undefined, {
-              weekday: 'short',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
+              weekday: 'long',
             });
           }
           if (Object.keys(map).length === courseSchedule.length) break;
@@ -209,8 +218,25 @@ const CourseHomePage: NextPage = () => {
             map[entry.dayOfWeek] = getNextDateForWeekday(entry.dayOfWeek);
           }
         });
-
         setNextLectureDatesByDay(map);
+        const nowDate = new Date();
+        const upcoming = courseSchedule
+          .map((entry) => ({
+            ...entry,
+            lectureDateTime: getLectureDateTime(entry.dayOfWeek, entry.startTime),
+          }))
+          .filter((entry) => entry.lectureDateTime.getTime() > nowDate.getTime())
+          .sort((a, b) => a.lectureDateTime.getTime() - b.lectureDateTime.getTime());
+
+        if (upcoming.length > 0) {
+          const next = upcoming[0].lectureDateTime;
+          const formatted = next.toLocaleDateString(undefined, {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          });
+          setNextLectureDateFormatted(formatted);
+        }
       } catch (error) {
         console.error('Failed to fetch lecture timeline:', error);
       }
@@ -423,46 +449,74 @@ const CourseHomePage: NextPage = () => {
                     {tCal.schedule}
                   </Typography>
                 </Box>
-                {courseSchedule.map((entry, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      mb: 1,
-                      p: 1,
-                      borderRadius: '6px',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e0f2f1',
-                    }}
+                {nextLectureDateFormatted && (
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 600, color: '#00796b', fontSize: '1rem' }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 600, color: '#004d40', minWidth: 'fit-content' }}
-                      >
-                        {nextLectureDatesByDay[entry.dayOfWeek] ??
-                          getNextDateForWeekday(entry.dayOfWeek)}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#00695c', whiteSpace: 'nowrap' }}>
-                        🕒 Time:{entry.startTime} – {entry.endTime}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#00695c' }}>
-                        📍Venue:{' '}
-                        {entry.venueLink ? (
-                          <a
-                            href={entry.venueLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ textDecoration: 'underline', color: '#004d40' }}
+                    Upcoming Lecture: {nextLectureDateFormatted}
+                  </Typography>
+                )}
+                {courseSchedule.map((entry, idx) => {
+                  const isNext = entry.dayOfWeek === nextLectureDay;
+                  return (
+                    <Box
+                      key={idx}
+                      sx={{
+                        mb: 1,
+                        p: 1,
+                        borderRadius: '6px',
+                        backgroundColor: isNext ? '#e1f5fe' : '#ffffff',
+                        border: isNext ? '2px solid #0288d1' : '1px solid #e0f2f1',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#004d40' }}>
+                          {nextLectureDatesByDay[entry.dayOfWeek]}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#00695c', whiteSpace: 'nowrap' }}>
+                          🕒 Time:{entry.startTime} – {entry.endTime}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#00695c' }}>
+                          📍Venue:{' '}
+                          {entry.venueLink ? (
+                            <a
+                              href={entry.venueLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline', color: '#004d40' }}
+                            >
+                              {entry.venue}
+                            </a>
+                          ) : (
+                            entry.venue
+                          )}
+                        </Typography>
+                        {courseSchedule.length > 1 && isNext && (
+                          <Typography
+                            component="span"
+                            sx={{
+                              ml: 1,
+                              px: 1,
+                              py: 0.25,
+                              backgroundColor: '#2196f3',
+                              color: 'white',
+                              borderRadius: '12px',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              animation: 'pulse 2s infinite',
+                              '@keyframes pulse': {
+                                '50%': { transform: 'scale(1.1)' },
+                              },
+                            }}
                           >
-                            {entry.venue}
-                          </a>
-                        ) : (
-                          entry.venue
+                            Upcoming Lecture
+                          </Typography>
                         )}
-                      </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             )}
 
