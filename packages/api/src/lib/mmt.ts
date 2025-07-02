@@ -10,7 +10,7 @@ import {
 } from '@stex-react/utils';
 import axios from 'axios';
 
-const server = new FLAMSServer(process.env['NEXT_PUBLIC_FLAMS_URL']!);
+export const server = new FLAMSServer(process.env['NEXT_PUBLIC_FLAMS_URL']!);
 
 export async function getDocumentSections(notesUri: string) {
   return (await server.contentToc({ uri: notesUri })) ?? [[], []];
