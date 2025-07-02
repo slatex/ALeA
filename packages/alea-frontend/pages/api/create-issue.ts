@@ -105,6 +105,10 @@ export default async function handler(req, res) {
     if (generatedTitle && body.data) {
       body.data.title = generatedTitle;
     }
+
+    if (issueCategory === 'DISPLAY') {
+      body.createNewIssueUrl = 'https://api.github.com/repos/slatex/ALeA/issues';
+    }
   }
 
   const headers = getHeaders(body.createNewIssueUrl);
