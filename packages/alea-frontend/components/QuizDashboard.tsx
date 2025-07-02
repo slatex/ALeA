@@ -15,7 +15,7 @@ import {
   Phase,
   QuizStatsResponse,
   QuizWithStatus,
-  updateQuiz
+  updateQuiz,
 } from '@stex-react/api';
 import { getQuizPhase } from '@stex-react/quiz-utils';
 import { SafeHtml } from '@stex-react/react-utils';
@@ -148,6 +148,7 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
   );
 
   const [recorrectionDialogOpen, setRecorrectionDialogOpen] = useState(false);
+  const [uploadErrorMessage, setUploadErrorMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function fetchQuizzes() {
@@ -162,7 +163,7 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
         onQuizIdChange?.(allQuizzes[0].id);
       }
     }
-    fetchQuizzes().catch((err) => console.error("Failed to fetch Quiz", err));
+    fetchQuizzes().catch((err) => console.error('Failed to fetch Quiz', err));
   }, [courseId, courseTerm, onQuizIdChange, quizId]);
 
   useEffect(() => {
@@ -336,22 +337,34 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
         </Select>
       </FormControl>
       {accessType == 'MUTATE' && (
-        <QuizFileReader setCss={setCss} setTitle={setTitle} setProblems={setProblems} />
+        <QuizFileReader
+          setCss={setCss}
+          setTitle={setTitle}
+          setProblems={setProblems}
+          setErrorMessage={setUploadErrorMessage}
+        />
       )}
       <br />
       <i>{Object.keys(problems).length} problems found.</i>
       <br />
 
       {selectedQuiz && (
-        <Typography sx={{ color: 'red' }} component="span" fontWeight="bold">
+        <Typography sx={{ color: 'red'  }} component="span" fontWeight="bold">
           {formErrorReason}
         </Typography>
       )}
+
+      {uploadErrorMessage && (
+        <Typography sx={{ color: 'red' }} fontWeight="bold">
+          {uploadErrorMessage}
+        </Typography>
+      )}
+
       <br />
       <Box display="flex" gap={2} alignItems="center" mt={2} mb={2}>
         {accessType == 'MUTATE' && (
           <Button
-            disabled={!!formErrorReason || isUpdating}
+            disabled={!!formErrorReason || isUpdating || !!uploadErrorMessage}
             variant="contained"
             startIcon={<UpdateIcon />}
             onClick={async (e) => {
