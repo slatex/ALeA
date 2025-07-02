@@ -96,20 +96,22 @@ export interface LectureEntry {
   venue?: string;
   venueLink?: string;
 }
+
 export interface CoverageTimeline {
   [courseId: string]: LectureEntry[];
 }
 
+
 export const COURSES_INFO: { [courseId: string]: CourseInfo } = {
   'ai-1': createCourseInfo(
     'ai-1',
-    'Artifical Intelligence - I',
+    'Artificial Intelligence - I',
     'MiKoMH/AI',
     'course/notes/notes1.tex'
   ),
   'ai-2': createCourseInfo(
     'ai-2',
-    'Artifical Intelligence - II',
+    'Artificial Intelligence - II',
     'MiKoMH/AI',
     'course/notes/notes2.xhtml',
     true,

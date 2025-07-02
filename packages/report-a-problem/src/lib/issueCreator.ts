@@ -5,18 +5,13 @@ import axios from 'axios';
 
 const THREE_BACKTICKS = '```';
 
-export enum IssueType {
-  ERROR = 'ERROR',
-  SUGGESTION = 'SUGGESTION',
-}
-
 export enum IssueCategory {
   CONTENT = 'CONTENT',
   DISPLAY = 'DISPLAY',
 }
 export interface SelectionContext {
   fragmentUri: FTML.URI;
-  fragmentKind: 'Section' | 'Paragraph' | 'Slide';
+  fragmentKind: 'Section' | 'Paragraph' | 'Slide' | 'Problem'; // Keep alingned with FTML.FragmentKind
   source?: string;
 }
 async function addSources(context: SelectionContext[]): Promise<SelectionContext[]> {
@@ -43,7 +38,6 @@ async function createSectionHierarchy(context: SelectionContext[]) {
 }
 
 async function createIssueBody(
-  type: IssueType,
   desc: string,
   selectedText: string,
   userName: string,
@@ -52,7 +46,7 @@ async function createIssueBody(
   const sectionHierarchy = await createSectionHierarchy(context);
   const user = userName || 'a user';
 
-  return `A content ${type.toString()} was logged by "${user}" at the following url:
+  return `An issue was logged by "${user}" at the following url:
 
 ${window.location.href}
 
@@ -69,61 +63,52 @@ ${THREE_BACKTICKS}
 ${sectionHierarchy}`;
 }
 
-function getNewIssueUrl(category: IssueCategory, projectId: string) {
-  if (category === IssueCategory.CONTENT) {
-    return `https://gl.mathhub.info/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
-  }
-  return 'https://api.github.com/repos/slatex/sTeX-React/issues';
+function isGitlabIssue(category: IssueCategory, context: SelectionContext[]) {
+  return category === IssueCategory.CONTENT && context?.length > 0;
+}
+
+function getNewIssueUrl(category: IssueCategory, projectId: string, context: SelectionContext[]) {
+  if (!isGitlabIssue(category, context)) return 'https://api.github.com/repos/slatex/ALeA/issues';
+  return `https://gl.mathhub.info/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
 }
 
 async function createIssueData(
-  type: IssueType,
   category: IssueCategory,
   desc: string,
   selectedText: string,
   context: SelectionContext[],
-  userName: string,
-  title?: string
+  userName: string
 ) {
-  const { filepath } = extractProjectAndFilepath(context[0]?.source);
-  const body = await createIssueBody(type, desc, selectedText, userName, context);
+  const body = await createIssueBody(desc, selectedText, userName, context);
   return {
-    title: title || `User reported ${type.toString()} ${filepath}`,
-    ...(category === IssueCategory.DISPLAY
-      ? { body, labels: ['user-reported'] }
-      : { description: body }),
+    ...(isGitlabIssue(category, context)
+      ? { description: body }
+      : { body, labels: ['user-reported'] }),
   };
 }
+
 export async function createNewIssue(
-  type: IssueType,
   category: IssueCategory,
   desc: string,
   selectedText: string,
   context: SelectionContext[],
-  userName: string,
-  title?: string
+  userName: string
 ) {
   const withSourceContext = await addSources(context);
   const { project } = extractProjectAndFilepath(withSourceContext[0]?.source);
   const projectId = project || 'sTeX/meta-inf';
-  const data = await createIssueData(
-    type,
-    category,
-    desc,
-    selectedText,
-    withSourceContext,
-    userName,
-    title
-  );
+  const data = await createIssueData(category, desc, selectedText, withSourceContext, userName);
+
   try {
-    const createNewIssueUrl = getNewIssueUrl(category, projectId);
+    const createNewIssueUrl = getNewIssueUrl(category, projectId, context);
     const response = await axios.post(
       '/api/create-issue',
       {
         data,
-        type,
         createNewIssueUrl,
-        category: category.toString(),
+        description: desc,
+        selectedText,
+        context: withSourceContext[0]?.source,
       },
       { headers: getAuthHeaders() }
     );
@@ -136,6 +121,6 @@ export async function createNewIssue(
 
 export function issuesUrlList(context: SelectionContext[]) {
   const { project } = extractProjectAndFilepath(context?.[0]?.source);
-  if (!project) return 'https://github.com/slatex/sTeX-React/issues';
+  if (!project) return 'https://github.com/slatex/ALeA/issues';
   return `https://gl.mathhub.info/${project}/-/issues`;
 }
