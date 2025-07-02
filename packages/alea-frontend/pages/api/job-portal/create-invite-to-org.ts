@@ -6,6 +6,7 @@ import { checkIfPostOrSetError, executeAndEndSet500OnError } from '../comment-ut
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfPostOrSetError(req, res)) return;
   const { orgId, email } = req.body;
+  if (!email || !orgId) return res.status(422).send('Email or OrgId missing');
   const inviterId = await getUserIdIfAuthorizedOrSetError(
     req,
     res,
@@ -14,10 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { orgId }
   );
   if (!inviterId) return;
-  if (!email || typeof email !== 'string') {
-    res.status(400).send('Invalid or missing email');
-    return;
-  }
+
   const result = await executeAndEndSet500OnError(
     `INSERT INTO orgInvitations (inviteruserId, inviteeEmail,organizationId) VALUES (?, ?, ?)`,
     [inviterId, email, orgId],

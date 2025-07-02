@@ -5,7 +5,7 @@ import {
   getUserIdOrSetError,
 } from '../comment-utils';
 
-export async function createOrganizationProfile(
+export async function createOrganizationProfileOrSet500OnError(
   {
     companyName,
     domain,
@@ -66,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     officePostalCode,
   } = req.body;
 
-  const result = await createOrganizationProfile(
+  const result = await createOrganizationProfileOrSet500OnError(
     {
       companyName,
       incorporationYear,

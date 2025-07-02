@@ -7,7 +7,7 @@ import {
   executeDontEndSet500OnError,
 } from '../comment-utils';
 
-export async function checkIfUserExistsOnJP(userId: string, res) {
+export async function checkIfUserExistsOnJPOrSet500OnError(userId: string, res) {
   let tableToCheck;
   if (isFauId(userId)) {
     tableToCheck = 'studentProfile';
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { orgId: organizationId }
   );
   if (!userId) return;
-  const userExists = await checkIfUserExistsOnJP(userId, res);
+  const userExists = await checkIfUserExistsOnJPOrSet500OnError(userId, res);
   if (!userExists) return;
   const result = await executeAndEndSet500OnError(
     `UPDATE recruiterProfile 

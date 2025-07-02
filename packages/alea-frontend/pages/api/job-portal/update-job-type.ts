@@ -14,28 +14,26 @@ export type DbJobCategoryInfo = JobCategoryInfo & {
   instanceId: string;
 };
 
-export async function getJobCategoryUsingIdOrSetError(
+export async function getJobCategoryUsingIdOrSet500OnError(
   id: number,
   res: NextApiResponse
 ): Promise<DbJobCategoryInfo | undefined> {
-  const results = await executeDontEndSet500OnError(
+  const results: any = await executeDontEndSet500OnError(
     'SELECT * FROM jobCategories WHERE id = ?',
     [id],
     res
   );
-  if (!results) return;
-  const currentJobCategory = results[0];
-  if (!currentJobCategory) res.status(404).send('jobCategories not found');
-  return currentJobCategory;
+  if (!results || !results.length) return;
+  return results[0] as DbJobCategoryInfo;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfPostOrSetError(req, res)) return;
   const { id, jobCategory, startDate, endDate, internshipPeriod } = req.body as JobCategoryInfo;
-  if (!id) return res.status(400).send('jobCategories id is missing');
+  if (!id) return res.status(422).send('jobCategory id is missing');
 
-  const currentJobCategory = await getJobCategoryUsingIdOrSetError(id, res);
-  if (!currentJobCategory) return res.status(404).send('jobCategories not found');
+  const currentJobCategory = await getJobCategoryUsingIdOrSet500OnError(id, res);
+  if (!currentJobCategory) return;
   const { instanceId, updatedAt } = currentJobCategory;
 
   const userId = await getUserIdIfAuthorizedOrSetError(

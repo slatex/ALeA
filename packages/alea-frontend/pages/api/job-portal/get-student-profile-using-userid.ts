@@ -8,7 +8,7 @@ import {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfGetOrSetError(req, res)) return;
   const userId = req.query.userId as string;
-  if (!userId) return;
+  if (!userId) return res.status(422).send('Missing userId');
   const results: any = await executeDontEndSet500OnError(
     `SELECT name, resumeUrl, email, mobile, programme, yearOfAdmission, yearOfGraduation, 
         courses, grades,gpa,location, about,socialLinks
@@ -18,9 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     [userId],
     res
   );
-  if (!results || !results.length) {
-    return res.status(200).json([]);
-  }
+  if (!results || !results.length) return;
   const student = results[0];
   let parsedSocialLinks: Record<string, string> = {};
 

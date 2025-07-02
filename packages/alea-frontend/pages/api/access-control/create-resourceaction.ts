@@ -12,12 +12,12 @@ export async function unsafeCreateResourceAccessUnlessForced(
   actionId: string,
   aclId: string,
   res: NextApiResponse
-): Promise<{ status: number; message: string }> {
+): Promise<any> {
   const existingQuery = `SELECT resourceId, actionId, aclId FROM ResourceAccess WHERE resourceId = ? AND actionId = ? AND aclId = ?`;
   const isExists: [{ resourceId: string; actionId: string; aclId: string }] =
     await executeAndEndSet500OnError(existingQuery, [resourceId, actionId, aclId], res);
   if (isExists.length > 0) {
-    return { status: 409, message: 'already exists' };
+    return res.status(409).send('already exists');
   }
   const resourceQuery = `INSERT INTO ResourceAccess (aclId, resourceId, actionId) VALUES (?, ?, ?)`;
   const result = await executeAndEndSet500OnError(
@@ -27,7 +27,7 @@ export async function unsafeCreateResourceAccessUnlessForced(
   );
   if (!result) return;
   await recomputeMemberships();
-  return { status: 200, message: 'created' };
+  return true;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -40,5 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).send('unauthorized');
 
   const result = await unsafeCreateResourceAccessUnlessForced(resourceId, actionId, aclId, res);
-  return res.status(result.status).json({ message: result.message });
+  if (!result) return;
+  res.status(200).send('created');
 }

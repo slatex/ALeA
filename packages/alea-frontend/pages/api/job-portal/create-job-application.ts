@@ -7,17 +7,18 @@ import {
 import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-utils';
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 
-export async function checkJobApplicationExists(id: number, userId: string, res: NextApiResponse) {
-  const results = await executeDontEndSet500OnError(
-    'SELECT * FROM jobapplication WHERE jobPostId = ? AND applicantId = ?',
+export async function checkJobApplicationExistsOrSet500OnError(
+  id: number,
+  userId: string,
+  res: NextApiResponse
+) {
+  const results: any = await executeDontEndSet500OnError(
+    'SELECT * FROM jobApplication WHERE jobPostId = ? AND applicantId = ?',
     [id, userId],
     res
   );
 
-  if (!results) return;
-  const currentJobApplication = results[0];
-  if (!currentJobApplication) return false;
-  return true;
+  return !!results?.length;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -30,16 +31,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { instanceId: CURRENT_TERM }
   );
   if (!userId) return;
-  const { jobPostId, applicantId, applicationStatus } = req.body;
-  const jobApplicationExists = await checkJobApplicationExists(jobPostId, userId, res);
-  console.log({ jobApplicationExists });
+  const { jobPostId, applicationStatus } = req.body;
+  const jobApplicationExists = await checkJobApplicationExistsOrSet500OnError(
+    jobPostId,
+    userId,
+    res
+  );
   if (jobApplicationExists) return res.status(200).send('Already applied');
 
   const result = await executeAndEndSet500OnError(
-    `INSERT INTO jobapplication 
+    `INSERT INTO jobApplication 
       (jobPostId,applicantId,applicationStatus) 
      VALUES (?,?,?)`,
-    [jobPostId, applicantId, applicationStatus],
+    [jobPostId, userId, applicationStatus],
     res
   );
   if (!result) return;

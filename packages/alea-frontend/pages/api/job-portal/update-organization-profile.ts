@@ -6,6 +6,7 @@ import { checkIfPostOrSetError, executeAndEndSet500OnError } from '../comment-ut
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfPostOrSetError(req, res)) return;
   const { data, id } = req.body;
+  if (!data || !id) return res.status(422).send('Missing required fields');
   const userId = await getUserIdIfAuthorizedOrSetError(
     req,
     res,

@@ -18,8 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     [jobPostId],
     res
   );
-  if (!results || !results.length) {
-    return res.status(200).json([]);
-  }
-  res.status(200).json(results[0]);
+  if (!results) return;
+  res.status(200).json(results[0] || []);
 }

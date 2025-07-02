@@ -329,7 +329,7 @@ CREATE TABLE jobCategories (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE admin (
+CREATE TABLE jobPortalAdmin (
     id SERIAL PRIMARY KEY,                  
     name VARCHAR(255) NOT NULL,            
     email VARCHAR(255) UNIQUE NOT NULL,    

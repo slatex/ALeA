@@ -4,7 +4,6 @@ import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-util
 import { Action, CURRENT_TERM, ResourceName } from '@stex-react/utils';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log("hellooo")
   if (!checkIfPostOrSetError(req, res)) return;
   const userId = await getUserIdIfAuthorizedOrSetError(
     req,
@@ -14,8 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { instanceId: CURRENT_TERM }
   );
   if (!userId) return;
-  const { jobCategory, internshipPeriod, startDate,endDate } = req.body;
-  console.log({jobCategory});
+  const { jobCategory, internshipPeriod, startDate, endDate } = req.body;
   let instanceId = req.body.instanceId as string;
   if (!instanceId) instanceId = CURRENT_TERM;
 
@@ -23,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     `INSERT INTO jobCategories 
       (jobCategory,internshipPeriod,startDate,endDate,instanceId) 
      VALUES (?, ?, ?, ?,?)`,
-    [jobCategory, internshipPeriod, startDate, endDate,instanceId],
+    [jobCategory, internshipPeriod, startDate, endDate, instanceId],
     res
   );
   if (!result) return;

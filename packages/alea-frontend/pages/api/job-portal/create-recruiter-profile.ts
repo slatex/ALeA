@@ -6,8 +6,9 @@ import {
 } from '../comment-utils';
 import { getUserIdIfAuthorizedOrSetError } from '../access-control/resource-utils';
 import { Action, CURRENT_TERM, isFauId, ResourceName } from '@stex-react/utils';
+import { RecruiterData } from '@stex-react/api';
 
-export async function createRecruiterProfile(
+export async function createRecruiterProfileOrSet500OnError(
   {
     name,
     userId,
@@ -18,6 +19,8 @@ export async function createRecruiterProfile(
   res: NextApiResponse
 ) {
   if (!userId || isFauId(userId)) return;
+  if (!name || !email || !position || !organizationId)
+    return res.status(422).send('Missing required fields');
   const result = await executeAndEndSet500OnError(
     `INSERT INTO recruiterProfile 
       (name, userId, email, position, organizationId) 
@@ -31,8 +34,9 @@ export async function createRecruiterProfile(
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfPostOrSetError(req, res)) return;
   const userId = await getUserIdOrSetError(req, res);
+  if (!userId) return;
   const { name, email, position, organizationId } = req.body;
-  const result = await createRecruiterProfile(
+  const result = await createRecruiterProfileOrSet500OnError(
     { name, userId, email, position, organizationId },
     res
   );

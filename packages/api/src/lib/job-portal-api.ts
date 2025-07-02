@@ -27,10 +27,10 @@ export async function createRecruiterProfile(data: RecruiterData) {
     headers: getAuthHeaders(),
   });
 }
-export async function deleteRecruiterProfile(id: string) {
+export async function deleteRecruiterProfile(userId: string) {
   await axios.post(
     '/api/job-portal/delete-recruiter-profile',
-    { id },
+    { userId },
     { headers: getAuthHeaders() }
   );
 }
@@ -69,7 +69,7 @@ export async function createOrganizationProfile(data: OrganizationData) {
 }
 export async function deleteOrganizationProfile(id: string) {
   await axios.post(
-    '/api/job-portal/create-organization-profile',
+    '/api/job-portal/delete-organization-profile',
     { id },
     { headers: getAuthHeaders() }
   );
@@ -201,7 +201,7 @@ export async function deleteJobPost(id: number) {
   await axios.post('/api/job-portal/delete-job-post', { id }, { headers: getAuthHeaders() });
 }
 
-export type CreateJobApplicationRequest = Omit<JobApplicationInfo, 'id'>;
+export type CreateJobApplicationRequest = Omit<JobApplicationInfo, 'id' | 'applicantId'>;
 export async function createJobApplication(data: CreateJobApplicationRequest) {
   await axios.post('/api/job-portal/create-job-application', data, {
     headers: getAuthHeaders(),

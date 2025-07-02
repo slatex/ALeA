@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { checkIfPostOrSetError, executeAndEndSet500OnError } from '../comment-utils';
 import { validateMemberAndAclIds } from '../acl-utils/acl-common-utils';
 
-export async function createAcl(
+export async function createAclOrSet500OnError(
   acl: {
     id: string;
     description: string;
@@ -24,10 +24,10 @@ export async function createAcl(
     !memberUserIds ||
     !memberACLIds
   ) {
-    return { status: 422, message: 'Missing required fields.' };
+    return res.status(422).send('Missing required fields.');
   }
   if (!(await validateMemberAndAclIds(res, memberUserIds, memberACLIds)))
-    return { status: 422, message: 'Invalid user or ACL IDs.' };
+    return res.status(422).send('Invalid items');
   const result = await executeAndEndSet500OnError(
     'INSERT INTO AccessControlList (id, description, updaterACLId, isOpen) VALUES (?,?, ?,?)',
     [id, description, updaterACLId, isOpen],
@@ -47,13 +47,13 @@ export async function createAcl(
     const resp = await executeAndEndSet500OnError(memberQuery, memberQueryParams, res);
     if (!resp) return;
   }
-  return { status: 201 };
+  return true;
 }
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfPostOrSetError(req, res)) return;
   const acl = req.body as AccessControlList;
   const { id, description, isOpen, updaterACLId, memberUserIds, memberACLIds } = acl;
-  const result = await createAcl(
+  const result = await createAclOrSet500OnError(
     {
       id,
       description,
@@ -64,9 +64,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     },
     res
   );
-  if (result.message) {
-    return res.status(result.status).json({ message: result.message });
-  } else {
-    return res.status(result.status).end();
-  }
+  if (!result) return;
+  res.status(201).end();
 }

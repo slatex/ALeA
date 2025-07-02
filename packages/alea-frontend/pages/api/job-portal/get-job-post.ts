@@ -6,6 +6,7 @@ import { checkIfGetOrSetError, executeDontEndSet500OnError } from '../comment-ut
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!checkIfGetOrSetError(req, res)) return;
   const organizationId = req.query.organizationId as string;
+  if (!organizationId) return res.status(422).send('missing organizationId');
   const userId = await getUserIdIfAuthorizedOrSetError(
     req,
     res,
@@ -21,9 +22,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     [organizationId],
     res
   );
-  if (!results || !results.length) {
-    return res.status(200).json([]);
-  }
-
+  if (!results) return;
   res.status(200).json(results);
 }
