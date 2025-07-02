@@ -15,6 +15,7 @@ import {
   UserInfo,
 } from '@stex-react/api';
 
+import { FTMLDocument } from '@kwarc/ftml-react';
 import {
   Alert,
   Box,
@@ -37,12 +38,11 @@ import { NextPage } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { RecordedSyllabus } from '../../components/RecordedSyllabus';
 import { useEffect, useRef, useState } from 'react';
+import { RecordedSyllabus } from '../../components/RecordedSyllabus';
+import { useStudentCount } from '../../hooks/useStudentCount';
 import { getLocaleObject } from '../../lang/utils';
 import MainLayout from '../../layouts/MainLayout';
-import { FTMLDocument } from '@kwarc/ftml-react';
-import { useStudentCount } from '../../hooks/useStudentCount';
 
 export function getCourseEnrollmentAcl(courseId: string, instanceId: string) {
   return `${courseId}-${instanceId}-enrollments`;
@@ -158,7 +158,7 @@ const CourseHomePage: NextPage = () => {
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [enrolled, setIsEnrolled] = useState<boolean | undefined>(undefined);
   const studentCount = useStudentCount(courseId, CURRENT_TERM);
-  
+
   useEffect(() => {
     getUserInfo().then((userInfo: UserInfo) => {
       setUserId(userInfo?.userId);
