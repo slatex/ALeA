@@ -82,7 +82,7 @@ function getFormErrorReason(
   }
   if (!problems || Object.keys(problems).length === 0) return 'No problems found.';
   if (title.length === 0) return 'No title set.';
-  if (css.length === 0) return 'CSS content is missing';
+  if (!css.length) return 'CSS content is missing';
   return undefined;
 }
 
