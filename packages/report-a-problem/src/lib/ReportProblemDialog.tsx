@@ -63,12 +63,11 @@ export function ReportProblemDialog({
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ color: '#00000099' }}>{t.selectedContent}</span>
           {context[0] && (
-            <Tooltip title="view source" PopperProps={{ disablePortal: true }} >
+            <Tooltip title="view source" PopperProps={{ disablePortal: true }}>
               <IconButton onClick={() => handleViewSource(context[0].fragmentUri)} color="primary">
                 <OpenInNewIcon />
               </IconButton>
             </Tooltip>
-            
           )}
         </Box>
 
@@ -121,31 +120,12 @@ export function ReportProblemDialog({
           onClick={async () => {
             setIsCreating(true);
             try {
-              let generatedTitle = undefined;
-              let issueCategory: IssueCategory = IssueCategory.CONTENT;
-
-              if (description.length > 10) {
-                const res = await fetch('/api/generate-issue-title', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ description, selectedText, context }),
-                });
-
-                const data = await res.json();
-
-                generatedTitle = data.title || 'Untitled Issue';
-                if (data.category === 'CONTENT' || data.category === 'DISPLAY') {
-                  issueCategory = data.category as IssueCategory;
-                }
-              }
-
               const issueLink = await createNewIssue(
-                issueCategory,
+                IssueCategory.CONTENT,
                 description,
                 selectedText,
                 context,
-                postAnonymously ? '' : userName,
-                generatedTitle?.trim().length > 0 ? generatedTitle.trim() : undefined
+                postAnonymously ? '' : userName
               );
               onCreateIssue(issueLink);
             } catch (e) {

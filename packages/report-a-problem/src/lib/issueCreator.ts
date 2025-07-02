@@ -94,13 +94,13 @@ async function createIssueData(
       : { body, labels: ['user-reported'] }),
   };
 }
+
 export async function createNewIssue(
   category: IssueCategory,
   desc: string,
   selectedText: string,
   context: SelectionContext[],
   userName: string,
-  title?: string
 ) {
   const withSourceContext = await addSources(context);
   const { project } = extractProjectAndFilepath(withSourceContext[0]?.source);
@@ -110,9 +110,9 @@ export async function createNewIssue(
     desc,
     selectedText,
     withSourceContext,
-    userName,
-    title
+    userName
   );
+  
   try {
     const createNewIssueUrl = getNewIssueUrl(category, projectId, context);
     const response = await axios.post(
@@ -121,6 +121,9 @@ export async function createNewIssue(
         data,
         createNewIssueUrl,
         category: category.toString(),
+        description: desc, 
+        selectedText,  
+        context: withSourceContext 
       },
       { headers: getAuthHeaders() }
     );
