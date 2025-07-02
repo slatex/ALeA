@@ -62,11 +62,14 @@ export function ReportProblemDialog({
       <DialogContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ color: '#00000099' }}>{t.selectedContent}</span>
-          <Tooltip title="view source">
-            <IconButton onClick={() => handleViewSource(context[0].fragmentUri)}>
-              <OpenInNewIcon />
-            </IconButton>
-          </Tooltip>
+          {context[0] && (
+            <Tooltip title="view source" PopperProps={{ disablePortal: true }} >
+              <IconButton onClick={() => handleViewSource(context[0].fragmentUri)} color="primary">
+                <OpenInNewIcon />
+              </IconButton>
+            </Tooltip>
+            
+          )}
         </Box>
 
         <Box
