@@ -47,28 +47,34 @@ npm run start alea-frontend
 ```
 - Runs on `http://localhost:4200`  
 
-## Access Control List (ACL) Setup  
 
-1. **Create ACL**  
-   - Visit `/acl` in the application.  
-   - Create a new ACL with:
-     - ACL ID: `sys-admin`
-     - Description: `sys-admin`
-     - Member ID: `fake_joy`
-     - Updater ACL: `sys-admin`
 
-2. **Modify `ResourceAccess` Table**  
-   Run:  
-   ```sql
-   INSERT INTO ResourceAccess (resourceId, actionId, aclId)
-   VALUES ('/**', 'ACCESS_CONTROL', 'sys-admin');
-   ```
+   
+# Access Control List (ACL) Setup
 
-## Fake User Login
+This guide provides step-by-step instructions to create and configure an Access Control List (ACL) in the system.
 
-1. **Login Flow**  
-   - User clicks on the **Login** button when getting started.
-   - A warning message appears, and the user must click on the **warning** word.
-   - The user then enters a 3-letter word (e.g., `abc`, `xyz`).
-   - The system automatically creates a fake user with the username `fake_abc` or `fake_xyz`.
+## Step 1: Create a New ACL
+
+1. Go to the `/acl` endpoint in the application.
+2. Create a new ACL with the following details:
+   - **ACL ID**: `sys-admin`
+   - **Description**: `write-dexription`
+   - **Add Member ID**: Specify the member ID, e.g., `fake_joy`
+   - **Add Member ACL**: Leave empty if no additional ACLs are to be added.
+   - **Updater ACL**: Set this to `sys-admin`.
+
+## Step 2: Insert into `ResourceAccess`
+
+Run the following SQL query to add resource access control:
+
+   ```INSERT INTO ResourceAccess (resourceId, actionId, aclId) VALUES ('/**', 'ACCESS_CONTROL', 'sys-admin');```
+
+## Step 3: Assign Resource-Action Permissions
+
+1. Navigate to the **exp** page in the application.
+2. Locate and click on the **system-administrator** button.
+3. Follow the prompts to create a resource-action assignment by specifying the desired resources and actions that the `sys-admin` role should control.
+4. Save the changes.
+
   
