@@ -17,8 +17,8 @@ function generateCalendarEvents(
 
     for (const entry of entries) {
       const lectureInfo = entry.isQuizScheduled
-        ? '📝 Regular Lecture and Quiz'
-        : '📚 Regular Lecture';
+        ? '📝 Lecture and Quiz'
+        : '📚 Lecture';
       if (entry.lectureEndTimestamp_ms) {
         events.push({
           start: new Date(entry.timestamp_ms),
@@ -138,7 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const calendar = ical({
-    name: `Personal Calendar for ${userId}`,
+    name: `ALeA Calendar for ${userId}`,
     timezone: 'Europe/Berlin',
   });
 
