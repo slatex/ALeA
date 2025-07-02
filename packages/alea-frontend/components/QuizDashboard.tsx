@@ -10,16 +10,15 @@ import {
   deleteQuiz,
   FTMLProblemWithSolution,
   getAllQuizzes,
-  getCourseInfo,
   getQuizStats,
   Phase,
   QuizStatsResponse,
   QuizWithStatus,
-  updateQuiz,
+  updateQuiz
 } from '@stex-react/api';
 import { getQuizPhase } from '@stex-react/quiz-utils';
 import { SafeHtml } from '@stex-react/react-utils';
-import { Action, CourseInfo, CURRENT_TERM, ResourceName, roundToMinutes } from '@stex-react/utils';
+import { Action, CURRENT_TERM, ResourceName, roundToMinutes } from '@stex-react/utils';
 import { AxiosResponse } from 'axios';
 import dayjs from 'dayjs';
 import type { NextPage } from 'next';
@@ -75,7 +74,7 @@ function getFormErrorReason(
   manuallySetPhase: string,
   problems: Record<string, FTMLProblemWithSolution>,
   title: string,
-  css : FTML.CSS[]
+  css: FTML.CSS[]
 ) {
   const phaseTimes = [quizStartTs, quizEndTs, feedbackReleaseTs].filter((ts) => ts !== 0);
   for (let i = 0; i < phaseTimes.length - 1; i++) {
@@ -83,7 +82,7 @@ function getFormErrorReason(
   }
   if (!problems || Object.keys(problems).length === 0) return 'No problems found.';
   if (title.length === 0) return 'No title set.';
-  if(css.length === 0) return 'CSS content is missing';
+  if (css.length === 0) return 'CSS content is missing';
   return undefined;
 }
 
@@ -154,14 +153,13 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
 
   useEffect(() => {
     async function fetchQuizzes() {
-      console.log("css",css.length);
       const allQuizzes: QuizWithStatus[] = await getAllQuizzes(courseId, courseTerm);
       allQuizzes?.sort((a, b) => b.quizStartTs - a.quizStartTs);
       for (const q of allQuizzes ?? []) {
         for (const css of q.css || []) FTML.injectCss(css);
       }
       setQuizzes(allQuizzes);
-      const validQuiz = allQuizzes.find((q) => q.id === quizId);
+      const validQuiz = allQuizzes.find((q) => q.id === quizId);  
       if (quizId !== NEW_QUIZ_ID && (!quizId || !validQuiz) && allQuizzes.length > 0) {
         onQuizIdChange?.(allQuizzes[0].id);
       }
@@ -340,22 +338,18 @@ const QuizDashboard: NextPage<QuizDashboardProps> = ({ courseId, quizId, onQuizI
         </Select>
       </FormControl>
       {accessType == 'MUTATE' && (
-        <QuizFileReader
-          setCss={setCss}
-          setTitle={setTitle}
-          setProblems={setProblems}
-        />
+        <QuizFileReader setCss={setCss} setTitle={setTitle} setProblems={setProblems} />
       )}
       <br />
       <i>{Object.keys(problems).length} problems found.</i>
       <br />
 
       {selectedQuiz && (
-        <Typography sx={{ color: 'red'  }} component="span" fontWeight="bold">
+        <Typography sx={{ color: 'red' }} component="span" fontWeight="bold">
           {formErrorReason}
         </Typography>
       )}
-      
+
       {!css?.length && Object.keys(problems).length > 0 && (
         <Typography sx={{ color: 'red' }} fontWeight="bold">
           CSS content is missing. Please try refreshing and re-uploading the quiz file.
