@@ -1,5 +1,6 @@
-import { Box, Typography, Tooltip, IconButton } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import { Alert, Box, IconButton, Snackbar, Tooltip, Typography } from '@mui/material';
+import { useState } from 'react';
 
 export function PersonalCalendarSection({
   userId,
@@ -10,18 +11,25 @@ export function PersonalCalendarSection({
   hintGoogle: string;
   hintApple: string;
 }) {
-  if (!userId) return null;
-
   const calendarURL = `https://courses.voll-ki.fau.de/api/calendar/create-calendar?userId=${userId}`;
-
+  const [calendarLinkCopied, setCalendarLinkCopied] = useState(false);
+  if (!userId) return null;
   return (
     <Box
       sx={{
-        px: 2,
-        py: 1.5,
+        px: { xs: 1, sm: 2 },
+        py: { xs: 1, sm: 1.5 },
         borderRadius: '8px',
         background: 'linear-gradient(135deg, #fff3e0, #e8f4fd)',
         border: '1px solid #ffcc02',
+        cursor: 'pointer',
+        '&:hover': {
+          background: 'linear-gradient(135deg,rgb(255, 191, 87), #e8f4fd)',
+        },
+      }}
+      onClick={() => {
+        navigator.clipboard.writeText(calendarURL);
+        setCalendarLinkCopied(true);
       }}
     >
       <Box
@@ -34,24 +42,9 @@ export function PersonalCalendarSection({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Tooltip title="Copy calendar link">
-            <CalendarMonthIcon
-              sx={{
-                fontSize: 20,
-                cursor: 'pointer',
-                color: '#1976d2',
-                '&:hover': { color: '#1565c0' },
-              }}
-              onClick={(event) => {
-                navigator.clipboard.writeText(calendarURL);
-                const icon = event.currentTarget as unknown as HTMLElement;
-                icon.style.color = '#4caf50';
-                setTimeout(() => (icon.style.color = '#1976d2'), 1200);
-              }}
-            />
-          </Tooltip>
+          <CalendarMonthIcon sx={{ fontSize: 20, color: '#1976d2' }} />
           <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2', fontSize: '1rem' }}>
-            Personal Calendar -
+            Copy Personal Calendar Link
           </Typography>
         </Box>
 
@@ -81,15 +74,13 @@ export function PersonalCalendarSection({
           </Tooltip>
           <Tooltip title={hintApple}>
             <IconButton
-              onClick={() => {
-                window.open(`webcal://${calendarURL.replace('https://', '')}`, '_blank');
-              }}
               sx={{
                 backgroundColor: '#fff',
                 border: '1px solid #dadce0',
                 borderRadius: '8px',
                 width: 32,
                 height: 32,
+                cursor: 'auto',
                 '&:hover': { backgroundColor: '#f8f9fa' },
               }}
             >
@@ -103,6 +94,13 @@ export function PersonalCalendarSection({
           </Tooltip>
         </Box>
       </Box>
+      <Snackbar
+        open={!!calendarLinkCopied}
+        autoHideDuration={8000}
+        onClose={() => setCalendarLinkCopied(false)}
+      >
+        <Alert severity="success">Calendar link copied to clipboard</Alert>
+      </Snackbar>
     </Box>
   );
 }
