@@ -5,14 +5,11 @@ This guide walks you through setting up and running the **ALeA** project, which 
 
 ## Prerequisites  
 Ensure you have the following installed on your system before proceeding:
-- **Node.js** (Recommended: `v18+`) – [Download](https://nodejs.org/)
-- **npm** (Recommended: `v9+`) – Comes with Node.js
+- **Node.js** (Recommended: `LTS`) – [Download](https://nodejs.org/)
+- **npm** (Recommended: `latest`) – `npm install -g npm@latest`
 - **Git** – [Download](https://git-scm.com/)
 - **MySQL** & **MySQL Workbench** – [Download](https://dev.mysql.com/downloads/)
-
-```sh
-npm install -g nx
-```
+- **nx** - `npm install -g nx`
 
 ## Installation  
 
