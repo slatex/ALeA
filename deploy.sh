@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 rm -rf dist/packages/alea-frontend-backup
 mv dist/packages/alea-frontend dist/packages/alea-frontend-backup || true
