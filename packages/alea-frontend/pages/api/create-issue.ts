@@ -96,8 +96,6 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
       throw new Error('Invalid classification response');
     }
 
-    console.log("title",classification.title);
-
     if (!['CONTENT', 'DISPLAY'].includes(classification.category)) {
       classification.category = 'CONTENT';
     }
@@ -118,7 +116,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(404);
   const body = req.body;
 
-  // Generate title and category if description is provided
   let generatedTitle = '';
   let issueCategory = 'CONTENT';
   
@@ -127,7 +124,6 @@ export default async function handler(req, res) {
     generatedTitle = classification.title;
     issueCategory = classification.category;
     
-    // Update the data with generated title
     if (generatedTitle && body.data) {
       body.data.title = generatedTitle;
     }
