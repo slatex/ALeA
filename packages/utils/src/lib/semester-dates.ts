@@ -18,6 +18,7 @@ export interface SemesterPeriod {
   lectureEnd: string;
   holidays: Holiday[];
   courses: Course[];
+  examDates: { courseId: string; examDate: string; examStartTime: string; examEndTime: string }[];
 }
 
 export const semesterPeriods: Record<string, SemesterPeriod> = {
@@ -83,6 +84,12 @@ export const semesterPeriods: Record<string, SemesterPeriod> = {
           'https://www.campo.fau.de:443/qisserver/pages/startFlow.xhtml?_flowId=showRoomDetail-flow&roomId=67&roomType=3&context=showRoomDetails&navigationPosition=organisation,searchroom',
       },
     ],
+    examDates: [
+      { courseId: 'krmt', examDate: '2025-07-28', examStartTime: '', examEndTime: '' },
+      { courseId: 'smai', examDate: '2025-07-22', examStartTime: '16:15', examEndTime: '17:50' },
+      { courseId: 'ai-2', examDate: '2025-07-30', examStartTime: '', examEndTime: '' },
+      { courseId: 'iwgs-2', examDate: '2025-07-24', examStartTime: '', examEndTime: '' },
+    ],
   },
   'WS25-26': {
     semesterStart: '2025-10-01',
@@ -94,5 +101,6 @@ export const semesterPeriods: Record<string, SemesterPeriod> = {
       { date: '2025-11-01', name: 'All Saints Day' },
     ],
     courses: [],
+    examDates: [],
   },
 };
