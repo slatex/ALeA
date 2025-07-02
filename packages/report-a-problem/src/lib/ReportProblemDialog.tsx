@@ -63,11 +63,15 @@ export function ReportProblemDialog({
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ color: '#00000099' }}>{t.selectedContent}</span>
           {context[0] && (
-            <Tooltip title="view source" PopperProps={{ disablePortal: true }}>
-              <IconButton onClick={() => handleViewSource(context[0].fragmentUri)} color="primary">
-                <OpenInNewIcon />
-              </IconButton>
-            </Tooltip>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => handleViewSource(context[0].fragmentUri)}
+              endIcon={<OpenInNewIcon />}
+              sx={{ padding: '2px 6px', minHeight: '24px', fontSize: '0.75rem', mb:0.5 }}
+            >
+              View Source
+            </Button>
           )}
         </Box>
 
@@ -79,6 +83,7 @@ export function ReportProblemDialog({
             borderRadius: '5px',
             maxHeight: '100px',
             overflowY: 'auto',
+            mb:1
           }}
         >
           {selectedText}

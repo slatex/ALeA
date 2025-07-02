@@ -77,9 +77,9 @@ async function createIssueData(
   desc: string,
   selectedText: string,
   context: SelectionContext[],
-  userName: string,
+  userName: string
 ) {
-  const body = await createIssueBody( desc, selectedText, userName, context);
+  const body = await createIssueBody(desc, selectedText, userName, context);
   return {
     ...(isGitlabIssue(category, context)
       ? { description: body }
@@ -92,19 +92,13 @@ export async function createNewIssue(
   desc: string,
   selectedText: string,
   context: SelectionContext[],
-  userName: string,
+  userName: string
 ) {
   const withSourceContext = await addSources(context);
   const { project } = extractProjectAndFilepath(withSourceContext[0]?.source);
   const projectId = project || 'sTeX/meta-inf';
-  const data = await createIssueData(
-    category,
-    desc,
-    selectedText,
-    withSourceContext,
-    userName
-  );
-  
+  const data = await createIssueData(category, desc, selectedText, withSourceContext, userName);
+
   try {
     const createNewIssueUrl = getNewIssueUrl(category, projectId, context);
     const response = await axios.post(
@@ -112,10 +106,9 @@ export async function createNewIssue(
       {
         data,
         createNewIssueUrl,
-        category: category.toString(),
-        description: desc, 
-        selectedText,  
-        context: withSourceContext 
+        description: desc,
+        selectedText,
+        context: withSourceContext[0]?.source,
       },
       { headers: getAuthHeaders() }
     );

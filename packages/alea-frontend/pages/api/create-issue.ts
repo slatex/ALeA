@@ -1,9 +1,8 @@
+import { extractRepoAndFilepath as extractProjectAndFilepath } from '@stex-react/utils';
 import axios, { RawAxiosRequestHeaders } from 'axios';
+import { OpenAI } from 'openai';
 import { sendAlert } from './add-comment';
 import { getUserId } from './comment-utils';
-import { OpenAI } from 'openai';
-import { SelectionContext } from '@stex-react/report-a-problem';
-import { extractRepoAndFilepath as extractProjectAndFilepath } from '@stex-react/utils';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -21,7 +20,11 @@ function getHeaders(createNewIssueUrl: string): RawAxiosRequestHeaders {
   };
 }
 
-async function generateIssueTitle(description: string, selectedText: string, context: SelectionContext[] ): Promise<IssueClassification> {
+async function generateIssueTitle(
+  description: string,
+  selectedText: string,
+  context: string
+): Promise<IssueClassification> {
   if (!description || description.length <= 10) {
     return { title: '', category: 'CONTENT' };
   }
@@ -59,16 +62,16 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
       max_tokens: 150,
-      response_format: { type: "json_object" }
+      response_format: { type: 'json_object' },
     });
-    
+
     const content = response.choices[0].message.content?.trim();
     if (!content) {
       throw new Error('No response content');
     }
 
     const classification: IssueClassification = JSON.parse(content);
-    
+
     if (!classification.title || !classification.category) {
       throw new Error('Invalid classification response');
     }
@@ -81,10 +84,16 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
     return classification;
   } catch (err) {
     console.error('Issue classification error:', err);
-    const { filepath } = extractProjectAndFilepath(context[0]?.source);
-    return { 
+    const { filepath } = extractProjectAndFilepath(context);
+    if (!filepath) {
+      return {
+        title: `User created issue`,
+        category: 'CONTENT',
+      };
+    }
+    return {
       title: `User reported issue in ${filepath}`,
-      category: 'CONTENT'
+      category: 'CONTENT',
     };
   }
 }
@@ -96,12 +105,16 @@ export default async function handler(req, res) {
 
   let generatedTitle = '';
   let issueCategory = 'CONTENT';
-  
+
   if (body.description && body.selectedText) {
-    const classification = await generateIssueTitle(body.description, body.selectedText, body.context);
+    const classification = await generateIssueTitle(
+      body.description,
+      body.selectedText,
+      body.context
+    );
     generatedTitle = classification.title;
     issueCategory = classification.category;
-    
+
     if (generatedTitle && body.data) {
       body.data.title = generatedTitle;
     }
@@ -117,12 +130,12 @@ export default async function handler(req, res) {
     headers,
   });
   const issue_url = response.data['web_url'] || response.data['html_url'];
-  
-  res.status(200).json({ 
+
+  res.status(200).json({
     issue_url,
     generatedTitle,
-    category: issueCategory
+    category: issueCategory,
   });
-  
+
   await sendAlert(`A user-reported issue was created at ${issue_url}`);
 }
