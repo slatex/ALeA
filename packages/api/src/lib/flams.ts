@@ -1,3 +1,4 @@
+import { getFlamsServer } from '@kwarc/ftml-react';
 import { FLAMSServer, ProblemFeedbackJson } from '@kwarc/flams';
 import { FTML } from '@kwarc/ftml-viewer';
 import {
@@ -10,20 +11,20 @@ import {
 } from '@stex-react/utils';
 import axios from 'axios';
 
-export const server = new FLAMSServer(process.env['NEXT_PUBLIC_FLAMS_URL']!);
+// export const getFlamsServer() = new FLAMSServer(process.env['NEXT_PUBLIC_FLAMS_URL']!);
 
 export async function getDocumentSections(notesUri: string) {
-  return (await server.contentToc({ uri: notesUri })) ?? [[], []];
+  return (await getFlamsServer().contentToc({ uri: notesUri })) ?? [[], []];
 }
 
 export async function getFTMLQuiz(uri: string): Promise<FTML.Quiz | undefined> {
-  return await server.quiz({ uri });
+  return await getFlamsServer().quiz({ uri });
 }
 
 export async function batchGradeHex(
   submissions: [string, (FTML.ProblemResponse | undefined)[]][]
 ): Promise<ProblemFeedbackJson[][] | undefined> {
-  return await server.batchGradeHex(...submissions);
+  return await getFlamsServer().batchGradeHex(...submissions);
 }
 
 export function computePointsFromFeedbackJson(
@@ -50,7 +51,7 @@ let CACHED_INSTITUTION_INDEX: FTML.Institution[] | undefined = undefined;
 
 export async function getDocIdx(institution?: string) {
   if (!CACHED_ARCHIVE_INDEX) {
-    const res = await server.index();
+    const res = await getFlamsServer().index();
     if (res) {
       CACHED_INSTITUTION_INDEX = res[0] as FTML.Institution[];
       CACHED_ARCHIVE_INDEX = res[1] as FTML.ArchiveIndex[];
@@ -118,11 +119,11 @@ export async function getCourseInfo(institution?: string) {
 }
 
 export async function getSectionSlides(sectionUri: string) {
-  return await server.slides({ uri: sectionUri });
+  return await getFlamsServer().slides({ uri: sectionUri });
 }
 
 export async function getSourceUrl(uri: string) {
-  return await server.sourceFile({ uri });
+  return await getFlamsServer().sourceFile({ uri });
 }
 
 export function getFTMLForConceptView(conceptUri: string) {
@@ -152,7 +153,7 @@ export async function getProblemsForConcept(conceptUri: string) {
   const MAX_RETRIES = 3;
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
-      const learningObjects = await server.learningObjects({ uri: conceptUri }, true);
+      const learningObjects = await getFlamsServer().learningObjects({ uri: conceptUri }, true);
       if (!learningObjects) return [];
       return learningObjects.filter((obj) => obj[1].type === 'Problem').map((obj) => obj[0]);
     } catch (error) {
