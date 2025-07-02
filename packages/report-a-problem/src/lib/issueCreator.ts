@@ -5,11 +5,6 @@ import axios from 'axios';
 
 const THREE_BACKTICKS = '```';
 
-export enum IssueType {
-  ERROR = 'ERROR',
-  SUGGESTION = 'SUGGESTION',
-}
-
 export enum IssueCategory {
   CONTENT = 'CONTENT',
   DISPLAY = 'DISPLAY',
@@ -83,12 +78,9 @@ async function createIssueData(
   selectedText: string,
   context: SelectionContext[],
   userName: string,
-  title?: string
 ) {
-  const { filepath } = extractProjectAndFilepath(context[0]?.source);
   const body = await createIssueBody( desc, selectedText, userName, context);
   return {
-    title: title || `User reported issue in ${filepath}`,
     ...(isGitlabIssue(category, context)
       ? { description: body }
       : { body, labels: ['user-reported'] }),

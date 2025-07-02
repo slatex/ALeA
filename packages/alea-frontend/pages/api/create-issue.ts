@@ -1,8 +1,9 @@
-import { NotificationType } from '@stex-react/api';
 import axios, { RawAxiosRequestHeaders } from 'axios';
 import { sendAlert } from './add-comment';
-import { getUserId, sendNotification } from './comment-utils';
+import { getUserId } from './comment-utils';
 import { OpenAI } from 'openai';
+import { SelectionContext } from '@stex-react/report-a-problem';
+import { extractRepoAndFilepath as extractProjectAndFilepath } from '@stex-react/utils';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -20,31 +21,7 @@ function getHeaders(createNewIssueUrl: string): RawAxiosRequestHeaders {
   };
 }
 
-async function sendReportNotifications(userId: string | null = null, link: string, type: string) {
-  if (type === 'SUGGESTION') {
-    await sendNotification(
-      userId,
-      'You provided a suggestion',
-      '',
-      'Du hast einen Vorschlag gemacht',
-      '',
-      NotificationType.SUGGESTION,
-      link
-    );
-  } else {
-    await sendNotification(
-      userId,
-      'You Reported a Problem',
-      '',
-      'Sie haben ein Problem gemeldet',
-      '',
-      NotificationType.REPORT_PROBLEM,
-      link
-    );
-  }
-}
-
-async function generateIssueTitle(description: string, selectedText: string, context: any): Promise<IssueClassification> {
+async function generateIssueTitle(description: string, selectedText: string, context: SelectionContext[] ): Promise<IssueClassification> {
   if (!description || description.length <= 10) {
     return { title: '', category: 'CONTENT' };
   }
@@ -104,8 +81,9 @@ Keep the title neutral, readable by educators and developers, and don't repeat t
     return classification;
   } catch (err) {
     console.error('Issue classification error:', err);
+    const { filepath } = extractProjectAndFilepath(context[0]?.source);
     return { 
-      title: '',
+      title: `User reported issue in ${filepath}`,
       category: 'CONTENT'
     };
   }
@@ -143,5 +121,4 @@ export default async function handler(req, res) {
   });
   
   await sendAlert(`A user-reported issue was created at ${issue_url}`);
-  // await sendReportNotifications(userId, issue_url, body.type);
 }
