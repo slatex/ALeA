@@ -9,9 +9,7 @@ import {
   DialogContent,
   FormControlLabel,
   FormHelperText,
-  IconButton,
   TextField,
-  Tooltip,
 } from '@mui/material';
 import { getUserInfo } from '@stex-react/api';
 import { handleViewSource } from '@stex-react/stex-react-renderer';
@@ -68,7 +66,7 @@ export function ReportProblemDialog({
               size="small"
               onClick={() => handleViewSource(context[0].fragmentUri)}
               endIcon={<OpenInNewIcon />}
-              sx={{ padding: '2px 6px', minHeight: '24px', fontSize: '0.75rem', mb:0.5 }}
+              sx={{ padding: '2px 6px', minHeight: '24px', fontSize: '0.75rem', mb: 0.5 }}
             >
               View Source
             </Button>
@@ -83,7 +81,7 @@ export function ReportProblemDialog({
             borderRadius: '5px',
             maxHeight: '100px',
             overflowY: 'auto',
-            mb:1
+            mb: 1,
           }}
         >
           {selectedText}
