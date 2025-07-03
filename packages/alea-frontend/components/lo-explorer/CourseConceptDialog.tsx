@@ -23,12 +23,12 @@ import {
   conceptUriToName,
   getCourseInfo,
   getDefiniedaInSection,
-  getDocumentSections,
   getSectionDependencies,
 } from '@stex-react/api';
 import { FTML } from '@kwarc/ftml-viewer';
 import { CourseInfo } from '@stex-react/utils';
 import React, { useEffect, useState } from 'react';
+import { getFlamsServer } from '@kwarc/ftml-react';
 
 export function getSectionDetails(tocElems: FTML.TOCElem[]): SectionDetails[] {
   const sections: SectionDetails[] = [];
@@ -84,9 +84,8 @@ export const CourseConceptsDialog = ({
       for (const courseId of Object.keys(courses)) {
         const notes = courses?.[courseId]?.notes;
         if (!notes) continue;
-        getDocumentSections(notes).then(([css, toc]) => {
-          secDetails[courseId] = getSectionDetails(toc);
-        });
+        const [css, toc] = (await getFlamsServer().contentToc({ uri: notes })) ?? [[], []];
+        secDetails[courseId] = getSectionDetails(toc);
       }
       setAllSectionDetails(secDetails);
     }

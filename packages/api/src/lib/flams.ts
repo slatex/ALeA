@@ -1,5 +1,5 @@
 import { getFlamsServer } from '@kwarc/ftml-react';
-import { FLAMSServer, ProblemFeedbackJson } from '@kwarc/flams';
+import { ProblemFeedbackJson } from '@kwarc/flams';
 import { FTML } from '@kwarc/ftml-viewer';
 import {
   COURSES_INFO,
@@ -11,15 +11,6 @@ import {
 } from '@stex-react/utils';
 import axios from 'axios';
 
-// export const getFlamsServer() = new FLAMSServer(process.env['NEXT_PUBLIC_FLAMS_URL']!);
-
-export async function getDocumentSections(notesUri: string) {
-  return (await getFlamsServer().contentToc({ uri: notesUri })) ?? [[], []];
-}
-
-export async function getFTMLQuiz(uri: string): Promise<FTML.Quiz | undefined> {
-  return await getFlamsServer().quiz({ uri });
-}
 
 export async function batchGradeHex(
   submissions: [string, (FTML.ProblemResponse | undefined)[]][]
@@ -118,13 +109,6 @@ export async function getCourseInfo(institution?: string) {
   }
 }
 
-export async function getSectionSlides(sectionUri: string) {
-  return await getFlamsServer().slides({ uri: sectionUri });
-}
-
-export async function getSourceUrl(uri: string) {
-  return await getFlamsServer().sourceFile({ uri });
-}
 
 export function getFTMLForConceptView(conceptUri: string) {
   const name = getParamFromUri(conceptUri, 's') ?? conceptUri;

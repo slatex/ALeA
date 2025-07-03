@@ -1,9 +1,9 @@
+import { getFlamsServer } from '@kwarc/ftml-react';
 import { FTML } from '@kwarc/ftml-viewer';
 import {
   CardsWithSmileys,
   getCourseInfo,
   getDefiniedaInSection,
-  getDocumentSections,
   getUriSmileys,
 } from '@stex-react/api';
 
@@ -46,7 +46,7 @@ function getChapterAndSections(toc: FTML.TOCElem, chapterTitle = ''): TopLevelSe
 }
 
 export async function getCardsBySection(notesUri: string) {
-  const docSections = await getDocumentSections(notesUri);
+  const docSections = (await getFlamsServer().contentToc({ uri: notesUri })) ?? [[], []];
   const tocContent = docSections[1];
   const topLevelSections = tocContent.map((toc) => getChapterAndSections(toc)).flat();
   const courseCards: CourseCards = {};
