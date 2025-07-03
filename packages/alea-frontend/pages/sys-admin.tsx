@@ -32,7 +32,6 @@ import {
   isUserMember,
   isValid,
   recomputeMemberships,
-  // server,
   UpdateResourceAction,
   updateResourceAction,
 } from '@stex-react/api';
