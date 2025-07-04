@@ -386,7 +386,7 @@ const CourseHomePage: NextPage = () => {
   const { home, courseHome: tCourseHome, calendarSection: tCal, quiz: q } = getLocaleObject(router);
   const t = home.courseThumb;
 
-  const showSearchBar = false; // ['ai-1', 'ai-2', 'iwgs-1', 'iwgs-2'].includes(courseId); TODO ALEA4-N12
+  const showSearchBar = ['ai-1', 'ai-2', 'iwgs-1', 'iwgs-2'].includes(courseId);
   function handleSearch() {
     if (!searchQuery) return;
     router.push(`/search/${courseId}?query=${encodeURIComponent(searchQuery)}`);
