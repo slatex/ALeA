@@ -45,7 +45,7 @@ function convertSnapToEntry(snap: LectureEntry, index: number): any {
     venue: snap.venue || '',
     venueLink: snap.venueLink || '',
     autoDetected: snap.autoDetected || undefined,
-    lectureEndTimestamp_ms: snap.lectureEndTimestamp_ms ,
+    lectureEndTimestamp_ms: snap.lectureEndTimestamp_ms,
   };
 }
 
@@ -112,7 +112,7 @@ export function CoverageUpdater({
       slideUri: '',
       slideNumber: undefined,
       venue: '',
-      venueLink:  '',
+      venueLink: '',
       lectureEndTimestamp_ms: undefined,
     });
     setEditIndex(null);
