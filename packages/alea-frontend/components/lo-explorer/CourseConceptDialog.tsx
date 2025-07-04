@@ -84,8 +84,9 @@ export const CourseConceptsDialog = ({
       for (const courseId of Object.keys(courses)) {
         const notes = courses?.[courseId]?.notes;
         if (!notes) continue;
-        const [css, toc] = (await getFlamsServer().contentToc({ uri: notes })) ?? [[], []];
-        secDetails[courseId] = getSectionDetails(toc);
+        secDetails[courseId] = getSectionDetails(
+          (await getFlamsServer().contentToc({ uri: notes }))?.[1] ?? []
+        );
       }
       setAllSectionDetails(secDetails);
     }

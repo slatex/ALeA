@@ -126,7 +126,7 @@ async function getSlidesFromToc(elems: FTML.TOCElem[], bySection: Record<string,
 }
 
 async function computeSlidesForDoc(notesUri: string) {
-  const toc = ((await getFlamsServer().contentToc({ uri: notesUri })) ?? [[], []])[1];
+  const toc = (await getFlamsServer().contentToc({ uri: notesUri }))?.[1] ?? [];
   const bySection: { [sectionId: string]: SlidesWithCSS } = {};
   await getSlidesFromToc(toc, bySection);
   return bySection;

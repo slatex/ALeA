@@ -9,11 +9,7 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
-import {
-  getCourseInfo,
-  getCoverageTimeline,
-  updateCoverageTimeline,
-} from '@stex-react/api';
+import { getCourseInfo, getCoverageTimeline, updateCoverageTimeline } from '@stex-react/api';
 import {
   convertHtmlStringToPlain,
   CourseInfo,
@@ -73,8 +69,7 @@ const CoverageUpdateTab = () => {
       const { notes: notesUri } = courseInfo;
       setLoading(true);
       try {
-        const tocResp = await getFlamsServer().contentToc({ uri: notesUri }) ?? [[], []];
-        const docSections = tocResp[1];
+        const docSections = (await getFlamsServer().contentToc({ uri: notesUri }))?.[1] ?? [];
         const sections = docSections.flatMap((d) => getSecInfo(d));
         setSecInfo(
           sections.reduce((acc, s) => {

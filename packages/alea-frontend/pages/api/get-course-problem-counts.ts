@@ -52,7 +52,7 @@ function collectSectionUris(toc: FTML.TOCElem[]): FTML.DocumentElementURI[] {
 }
 
 async function fetchProblems(notesUri: string): Promise<Record<FTML.DocumentElementURI, string[]>> {
-  const tocContent = ((await getFlamsServer().contentToc({ uri: notesUri })) ?? [[], []])[1];
+  const tocContent = (await getFlamsServer().contentToc({ uri: notesUri }))?.[1] ?? [];
   const sectionUris = collectSectionUris(tocContent);
 
   const problems: Record<FTML.DocumentElementURI, string[]> = {};

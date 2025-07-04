@@ -29,8 +29,7 @@ const CourseProblemsPage: NextPage = () => {
         return;
       }
       const { notes } = courseInfo;
-      const docSections = (await getFlamsServer().contentToc({ uri: notes })) ?? [[], []];
-      const tocContent = docSections[1];
+      const tocContent = (await getFlamsServer().contentToc({ uri: notes }))?.[1] ?? [];
       setSectionsData(tocContent);
     }
     fetchSectionData();
