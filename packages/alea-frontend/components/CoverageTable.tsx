@@ -116,6 +116,25 @@ function CoverageRow({
                 </Typography>
                 {`${itemDate.format('HH:mm')} - ${endTime.format('HH:mm')}`}
               </Box>
+              {item.venue && (
+                <>
+                  <Typography fontWeight="bold" mt={1}>
+                    Venue
+                  </Typography>
+                  <Typography>{item.venue}</Typography>
+                </>
+              )}
+
+              {item.venueLink && (
+                <>
+                  <Typography fontWeight="bold" mt={1}>
+                    Venue Link
+                  </Typography>
+                  <a href={item.venueLink} target="_blank" rel="noopener noreferrer">
+                    {item.venueLink}
+                  </a>
+                </>
+              )}
             </Box>
           }
           arrow
