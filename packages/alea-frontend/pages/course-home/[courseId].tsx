@@ -98,7 +98,7 @@ export function ExamSchedule({ examDates }) {
 
       {examDates.map((exam, idx) => {
         const hasTime = exam.examStartTime && exam.examEndTime;
-        const start = new Date(`${exam.examDate}T${exam.examStartTime || '00:00'}:00+02:00`);
+        const start = new Date(`${exam.examDate}T${exam.examStartTime || '00:00'}:00+02:00`);  //+02:00 is used because we assume Europe/Berlin time.
         const end = new Date(`${exam.examDate}T${exam.examEndTime || '00:00'}:00+02:00`);
 
         const formattedDate = start.toLocaleDateString('en-GB', {
