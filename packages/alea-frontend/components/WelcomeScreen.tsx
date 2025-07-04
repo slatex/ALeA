@@ -24,7 +24,6 @@ import {
   getCourseInfo,
   getCourseInstanceThreads,
   getCourseQuizList,
-  getDocumentSections,
   getHomeworkList,
   getUserInfo,
   QuestionStatus,
@@ -52,6 +51,7 @@ import { CourseThumb } from '../pages/u/[institution]';
 import { SecInfo } from '../types';
 import { getSecInfo } from './coverage-update';
 import { calculateLectureProgress } from './CoverageTable';
+import { getFlamsServer } from '@kwarc/ftml-react';
 
 interface ColorInfo {
   color: string;
@@ -264,7 +264,7 @@ export async function getLastUpdatedNotes(
       const notesUri = allCourses[courseId]?.notes;
 
       if (notesUri) {
-        const tocResp = await getDocumentSections(notesUri);
+        const tocResp = await getFlamsServer().contentToc({ uri: notesUri });
         const docSections = tocResp[1];
         const sections = docSections.flatMap((d) => getSecInfo(d));
         const secInfo = sections.reduce((acc, s) => {
