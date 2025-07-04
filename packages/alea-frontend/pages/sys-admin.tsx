@@ -32,7 +32,6 @@ import {
   isUserMember,
   isValid,
   recomputeMemberships,
-  server,
   UpdateResourceAction,
   updateResourceAction,
 } from '@stex-react/api';
@@ -58,6 +57,7 @@ import {
   createStaffResourceActions,
   createStudentResourceActions,
 } from 'packages/utils/src/lib/semester-helper';
+import { getFlamsServer } from '@kwarc/ftml-react';
 
 const SysAdmin: NextPage = () => {
   const router = useRouter();
@@ -84,7 +84,7 @@ const SysAdmin: NextPage = () => {
   const [courseIds, setCourseIds] = useState([]);
 
   useEffect(() => {
-    server.index().then((data) => {
+    getFlamsServer().index().then((data) => {
       const courseId = data[1]
         .filter((obj) => obj.type === 'course')
         .map((courseObj) => courseObj.acronym.toLowerCase());

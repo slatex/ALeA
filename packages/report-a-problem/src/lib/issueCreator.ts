@@ -1,5 +1,6 @@
+import { getFlamsServer } from '@kwarc/ftml-react';
 import { FTML } from '@kwarc/ftml-viewer';
-import { getAuthHeaders, getSourceUrl } from '@stex-react/api';
+import { getAuthHeaders } from '@stex-react/api';
 import { extractRepoAndFilepath as extractProjectAndFilepath } from '@stex-react/utils';
 import axios from 'axios';
 
@@ -16,7 +17,11 @@ export interface SelectionContext {
 }
 async function addSources(context: SelectionContext[]): Promise<SelectionContext[]> {
   return await Promise.all(
-    context.map((item) => getSourceUrl(item.fragmentUri).then((source) => ({ ...item, source })))
+    context.map((item) =>
+      getFlamsServer()
+        .sourceFile({ uri: item.fragmentUri })
+        .then((source) => ({ ...item, source }))
+    )
   );
 }
 
