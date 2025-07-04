@@ -15,7 +15,7 @@ import AclDisplay from './AclDisplay';
 import { useStudentCount } from '../hooks/useStudentCount';
 
 const ALL_SHORT_IDS = [
-  'notes',
+  'syllabus',
   'quiz',
   'homework-crud',
   'homework-grading',
@@ -44,7 +44,7 @@ const staffAccessResources: Record<ShortId, string> = {
   'quiz-preview': 'Quiz Preview',
   'homework-crud': 'Homework Create/Update',
   'homework-grading': 'Homework Grading',
-  notes: 'Notes Management',
+  'syllabus': 'Syllabus Management',
   'study-buddy': 'Study Buddy Management',
   'comments': 'Comments Moderation',
 } as const;
@@ -56,8 +56,8 @@ const studentAccessResources: Record<ShortId, string> = {
 
 const getAclShortIdToResourceActionPair = (courseId: string) =>
   ({
-    'notes': {
-      resourceId: `/course/${courseId}/instance/${CURRENT_TERM}/notes`,
+    'syllabus': {
+      resourceId: `/course/${courseId}/instance/${CURRENT_TERM}/syllabus`,
       actionId: Action.MUTATE,
     },
     'quiz': {
