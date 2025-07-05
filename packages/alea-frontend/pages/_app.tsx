@@ -5,8 +5,9 @@ import { MathJaxContext } from '@stex-react/mathjax';
 import { PositionProvider, ServerLinksContext } from '@stex-react/stex-react-renderer';
 import { PRIMARY_COL, SECONDARY_COL } from '@stex-react/utils';
 import { AppProps } from 'next/app';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './styles.scss';
+import { CircularProgress } from '@mui/material';
 
 const instance = createInstance({
   urlBase: 'https://matomo.kwarc.info',
@@ -51,15 +52,20 @@ const theme = createTheme({
 });
 
 function CustomApp({ Component, pageProps }: AppProps) {
+  const [flamsInitialized, setFlamsInitialized] = useState(false);
   useEffect(() => {
     initialize(process.env.NEXT_PUBLIC_FLAMS_URL, false)
       .then(() => {
         console.log('FTML initialized');
+        setFlamsInitialized(true);
       })
       .catch((err) => {
         console.error(`FTML initialization failed: [${process.env.NEXT_PUBLIC_FLAMS_URL}]`, err);
       });
   }, []);
+
+  if (!flamsInitialized) return <CircularProgress />;
+
   return (
     <ServerLinksContext.Provider value={{ gptUrl: process.env.NEXT_PUBLIC_GPT_URL }}>
       <MatomoProvider value={instance}>
